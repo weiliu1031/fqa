@@ -9,7 +9,7 @@
 <h1 align="center">FQA</h1>
 
 <p align="center">
-  Feature-level QA orchestration for AI coding agents, with explicit human review gates.
+  面向 AI coding agent 的 feature 级 QA 编排流程，内置明确的人工审核关卡。
 </p>
 
 <p align="center">
@@ -24,21 +24,19 @@
 
 ---
 
-Tired of large features reaching release review with scattered notes, ad-hoc
-scripts, and unclear evidence? FQA turns feature QA into a traceable workflow:
-understand the design, model risk, generate cases, wait for human approval,
-execute on a cluster, report findings, create approved issues, and rerun
-regression.
+大 feature 到 release review 时，经常只剩零散笔记、临时脚本和不完整证据。
+FQA 把 feature QA 变成一条可追踪流程：理解设计、建模风险、生成 case、
+等待人工审批、在集群执行、汇总发现、创建已批准的 issue，并在修复后回归。
 
-## Demo
+## 演示
 
-**You:**
+**你：**
 
 ```text
 Use $fqa to test this feature PR. There is no design doc.
 ```
 
-**Agent:**
+**Agent：**
 
 ```text
 State: Drafting
@@ -65,26 +63,26 @@ stateDiagram-v2
     Regression --> Closed
 ```
 
-## Who Is This For
+## 适合谁
 
-| If you are... | FQA helps you... |
+| 如果你是... | FQA 可以帮你... |
 | --- | --- |
-| Maintainer reviewing a large feature | Turn a PR or branch into a reviewed QA plan with traceable evidence |
-| QA engineer validating a release risk | Generate cluster-level cases, scripts, reports, and regression plans |
-| AI agent building test artifacts | Follow a strict state machine instead of improvising a test workflow |
+| 正在 review 大 feature 的 maintainer | 把 PR 或分支转成有审核、有证据链的 QA 计划 |
+| 验证 release 风险的 QA engineer | 生成集群级 case、脚本、报告和回归计划 |
+| 生成测试产物的 AI agent | 遵循严格状态机，而不是即兴拼一个测试流程 |
 
-## Key Features
+## 核心特性
 
-- Generates design and implementation understanding when docs are missing.
-- Converts feature risk into structured, reviewable test cases.
-- Enforces human gates before script generation, cluster execution, and issue creation.
-- Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
-- Tracks stable IDs across features, cases, runs, failures, issues, and regressions.
-- Supports cluster-oriented QA without pretending to be a unit-test generator.
+- 没有设计文档时，生成 design 和 implementation understanding。
+- 将 feature 风险转换成结构化、可审核的 test case。
+- 在脚本生成、集群执行、issue 创建前强制人工 gate。
+- 提供 test plan、case、script、result、report、issue candidate 等模板。
+- 用稳定 ID 串联 feature、case、run、failure、issue 和 regression。
+- 面向集群级 QA，不把自己伪装成 unit-test 生成器。
 
-## Quick Start
+## 快速开始
 
-Clone the project and install the skill into your Codex skills directory:
+克隆项目，并把 skill 安装到 Codex skills 目录：
 
 ```bash
 git clone https://github.com/weiliu1031/fqa.git
@@ -92,30 +90,30 @@ cd fqa
 ./scripts/install-skill.sh
 ```
 
-Validate the skill package:
+校验 skill package：
 
 ```bash
 ./scripts/validate-skill.sh
 ```
 
-Use the skill from an agent session:
+在 agent 会话中使用：
 
 ```text
 Use $fqa to generate feature-level test cases for this PR.
 ```
 
-## Usage
+## 使用方式
 
-### Generate cases from a feature branch
+### 从 feature branch 生成 case
 
-**Input**
+**输入**
 
 ```text
 Use $fqa to analyze this branch and generate feature-level test cases.
 No design document is available.
 ```
 
-**Output**
+**输出**
 
 ```text
 State: CaseReview
@@ -129,16 +127,16 @@ Artifacts:
 Waiting for human approval before generating scripts.
 ```
 
-### Execute approved cases on a cluster
+### 在集群上执行已批准的 case
 
-**Input**
+**输入**
 
 ```text
 The cases are approved. Use endpoint alias staging-us-west.
 Cleanup is allowed. Component restarts are not allowed.
 ```
 
-**Output**
+**输出**
 
 ```text
 State: ReportReview
@@ -151,16 +149,16 @@ Failures were classified into product bugs, test bugs, environment issues,
 requirement ambiguity, and blocked coverage.
 ```
 
-### Review issue candidates and run regression
+### 审核 issue candidate 并执行回归
 
-**Input**
+**输入**
 
 ```text
 Approve ISSUE-CAND-001 and ISSUE-CAND-003. Skip ISSUE-CAND-002.
 Rerun regression after the fix PR is merged.
 ```
 
-**Output**
+**输出**
 
 ```text
 State: Regression
@@ -170,9 +168,9 @@ State: Regression
 - Updated test-report.md with regression evidence
 ```
 
-## How It Works
+## 工作原理
 
-FQA is a Codex skill plus reusable templates:
+FQA 是一个 Codex skill 加一组可复用模板：
 
 ```text
 skills/fqa/
@@ -195,40 +193,40 @@ skills/fqa/
     └── test-script-header.py
 ```
 
-The skill keeps the loaded context small. `SKILL.md` contains the state machine
-and guardrails; detailed schemas and writing rules live in `references/`;
-copyable artifact skeletons live in `assets/templates/`.
+这个 skill 会控制加载到上下文里的内容量。`SKILL.md` 只保留状态机和防护规则；
+详细 schema 和写作规则放在 `references/`；可复制的产物骨架放在
+`assets/templates/`。
 
-## Security
+## 安全
 
-FQA is a workflow skill. The repository itself does not connect to external
-services, store credentials, or execute tests against a cluster.
+FQA 是一个流程型 skill。这个仓库本身不会连接外部服务、保存凭证，也不会对集群
+执行测试。
 
-When an agent uses FQA on a real feature:
+当 agent 在真实 feature 上使用 FQA 时：
 
-- Do not print secrets in reports, logs, or issue bodies.
-- Require explicit approval before using cluster credentials.
-- Require explicit approval before destructive cleanup, restarts, or fault injection.
-- Require explicit approval before creating external issues.
-- Store generated run artifacts outside source control unless they are sanitized.
+- 不要在报告、日志或 issue 内容里打印 secret。
+- 使用集群凭证前必须获得明确批准。
+- 执行破坏性 cleanup、组件重启或故障注入前必须获得明确批准。
+- 创建外部 issue 前必须获得明确批准。
+- 除非已脱敏，不要把生成的 run artifacts 放进源码仓库。
 
-## Contributing
+## 贡献
 
-Contributions are welcome. Good first contributions include:
+欢迎贡献。适合优先做的改进包括：
 
-- Improving artifact schemas.
-- Adding examples for specific product domains.
-- Tightening the human-gate workflow.
-- Adding runner helpers that preserve the same approval model.
+- 改进 artifact schema。
+- 为特定产品领域添加示例。
+- 收紧人工 gate 工作流。
+- 添加 runner helper，同时保持相同的审批模型。
 
-Before opening a PR, run:
+提交 PR 前请运行：
 
 ```bash
 ./scripts/validate-skill.sh
 ```
 
-Please keep `README.md` and `README_CN.md` structurally synchronized.
+请保持 `README.md` 和 `README_CN.md` 的结构同步。
 
-## License
+## 许可证
 
-MIT License. See [LICENSE](LICENSE).
+MIT License。见 [LICENSE](LICENSE)。

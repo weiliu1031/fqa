@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="220" viewBox="0 0 720 220" role="img" aria-labelledby="title desc">
+  <title id="title">FQA logo</title>
+  <desc id="desc">FQA feature QA orchestration logo for light backgrounds</desc>
+  <rect width="720" height="220" rx="32" fill="#ffffff"/>
+  <rect x="32" y="32" width="656" height="156" rx="24" fill="#f6f8fa" stroke="#d0d7de" stroke-width="2"/>
+  <circle cx="116" cy="110" r="48" fill="#0969da"/>
+  <path d="M94 112l15 15 31-38" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="190" y="100" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="58" font-weight="800" fill="#24292f">FQA</text>
+  <text x="192" y="142" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24" font-weight="500" fill="#57606a">Feature QA orchestration</text>
+  <path d="M528 82h86M528 110h108M528 138h72" stroke="#0969da" stroke-width="10" stroke-linecap="round"/>
+</svg>
