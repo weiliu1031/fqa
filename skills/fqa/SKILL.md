@@ -1,0 +1,137 @@
+---
+name: fqa
+description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
+---
+
+# FQA
+
+FQA drives a feature-level QA workflow with explicit human gates. Treat every
+artifact as part of a traceable chain from feature understanding to test cases,
+test runs, issues, fixes, regression, and final report.
+
+## Core Rule
+
+Do not execute an irreversible or externally visible step without explicit
+approval in the current conversation.
+
+Required gates:
+
+1. Stop after generating test cases. Ask for test case approval.
+2. Stop before execution. Ask for cluster connection details and execution
+   permission.
+3. Stop after generating issue candidates. Ask which issues to create.
+4. Stop before closing the workflow. Ask whether regression results are
+   accepted.
+
+## State Machine
+
+Use exactly one active state:
+
+```text
+Drafting
+-> CaseReview
+-> WaitingCluster
+-> ScriptReady
+-> Running
+-> ReportReview
+-> IssueReview
+-> IssueCreated
+-> WaitingFix
+-> Regression
+-> Closed
+```
+
+If the user resumes a workflow, identify the current state from artifacts and
+continue from there. Do not restart unless requested.
+
+## Workflow
+
+1. **Collect inputs**
+   - Feature name or PR/issue/branch/commit.
+   - Design document, if available.
+   - Repository path and code paths.
+   - Test constraints, release target, and forbidden operations.
+
+2. **Understand the feature**
+   - If a design document exists, summarize it.
+   - If no design document exists, inspect source code and generate:
+     - `design-understanding.md`
+     - `implementation-understanding.md`
+   - Read `references/workflow.md` for the full artifact flow.
+
+3. **Model risk**
+   - Cover user workflows, cross-component behavior, persistence, recovery,
+     compatibility, concurrency, configuration, performance, observability,
+     security, and rollback.
+   - Read `references/test-case-guidelines.md` before generating cases.
+
+4. **Generate test plan and test cases**
+   - Use `assets/templates/test-plan.yaml`.
+   - Use one `assets/templates/test-case.yaml` shape per case.
+   - Set state to `CaseReview`.
+   - Ask the user to approve, reject, or edit cases.
+
+5. **Ask for cluster access**
+   - After case approval, request endpoint, auth method, namespace, resource
+     limits, cleanup permission, and fault-injection permission.
+   - Set state to `WaitingCluster` until provided.
+
+6. **Generate scripts**
+   - Generate scripts only for approved cases.
+   - Use `assets/templates/test-script-header.py` as the script contract.
+   - Each script must emit a `test-run-result.yaml` compatible result.
+   - Set state to `ScriptReady`.
+
+7. **Execute and collect evidence**
+   - Execute only after cluster permission.
+   - Record code version, cluster version, config, raw output, logs, metrics,
+     and cleanup status.
+   - Set state to `Running`, then `ReportReview`.
+
+8. **Report and classify failures**
+   - Use `assets/templates/test-report.md`.
+   - Classify each failure as product bug, test bug, environment issue,
+     requirement ambiguity, or blocked.
+   - Generate issue candidates using `assets/templates/issue-candidate.yaml`.
+   - Read `references/report-guidelines.md` and `references/issue-guidelines.md`.
+   - Set state to `IssueReview`.
+
+9. **Create issues only after approval**
+   - Create only approved issues.
+   - Link issue IDs back to case IDs and run IDs.
+   - Set state to `IssueCreated` or `WaitingFix`.
+
+10. **Regression**
+    - When fixes are available, rerun failed cases and adjacent-risk cases.
+    - Update the report with fix versions and regression outcomes.
+    - Set state to `Regression`, then `Closed` after user acceptance.
+
+## Artifact IDs
+
+Use stable IDs:
+
+- `feature_id`: `fqa-<short-name>-YYYYMMDD`
+- `case_id`: `FQA-<NNN>`
+- `run_id`: `RUN-YYYYMMDD-HHMMSS`
+- `failure_id`: `FAIL-<case_id>-<NN>`
+- `issue_candidate_id`: `ISSUE-CAND-<NN>`
+- `regression_id`: `REG-YYYYMMDD-HHMMSS`
+
+## Reference Files
+
+- Read `references/workflow.md` for phase details and resume behavior.
+- Read `references/artifact-schema.md` when writing structured artifacts.
+- Read `references/test-case-guidelines.md` before generating test cases.
+- Read `references/report-guidelines.md` before writing reports.
+- Read `references/issue-guidelines.md` before creating issue candidates.
+
+## Output Discipline
+
+Keep user-facing updates concise. Always state:
+
+- Current state.
+- Artifact path changed or produced.
+- Required next human decision, if blocked.
+
+Never hide failed cleanup, missing evidence, skipped checks, or environment
+problems behind a passing summary.

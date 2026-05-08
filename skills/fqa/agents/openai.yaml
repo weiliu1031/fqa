@@ -1,0 +1,4 @@
+interface:
+  display_name: "FQA"
+  short_description: "Feature QA workflow with review gates"
+  default_prompt: "Use $fqa to plan, execute, report, and regress a feature-level QA workflow."

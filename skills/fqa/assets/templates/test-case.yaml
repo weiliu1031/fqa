@@ -1,0 +1,36 @@
+case_id: FQA-001
+title: ""
+priority: P1
+risk:
+  risk_id: RISK-001
+  area: ""
+  description: ""
+preconditions:
+  - ""
+cluster_requirement:
+  topology: ""
+  permissions:
+    cleanup: false
+    restart_components: false
+    fault_injection: false
+data_requirement:
+  datasets:
+    - ""
+  scale: ""
+steps:
+  - step: 1
+    action: ""
+    expected: ""
+assertions:
+  - ""
+observability:
+  logs:
+    - ""
+  metrics:
+    - ""
+  traces:
+    - ""
+cleanup:
+  required: true
+  method: ""
+status: proposed

@@ -1,0 +1,22 @@
+run_id: RUN-YYYYMMDD-HHMMSS
+case_id: FQA-001
+status: blocked
+started_at: ""
+ended_at: ""
+environment:
+  endpoint_alias: ""
+  version: ""
+  commit: null
+  topology: ""
+evidence:
+  logs: []
+  metrics: []
+  traces: []
+  artifacts: []
+failure:
+  failure_id: null
+  classification: null
+  summary: null
+cleanup:
+  attempted: false
+  status: not_needed

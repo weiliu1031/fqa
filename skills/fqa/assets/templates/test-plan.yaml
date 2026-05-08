@@ -1,0 +1,30 @@
+feature_id: fqa-feature-YYYYMMDD
+feature_name: ""
+state: CaseReview
+source:
+  design_doc: null
+  repo: null
+  branch: null
+  commit: null
+  pr: null
+  issue: null
+risk_model:
+  - risk_id: RISK-001
+    area: primary_workflow
+    description: ""
+    severity: P1
+    covered_by:
+      - FQA-001
+cases:
+  - case_id: FQA-001
+    title: ""
+approval:
+  test_cases_approved: false
+  approved_by: null
+  approved_at: null
+cluster:
+  provided: false
+  endpoint_alias: null
+  cleanup_allowed: false
+  restart_allowed: false
+  fault_injection_allowed: false

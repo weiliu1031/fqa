@@ -1,0 +1,21 @@
+issue_candidate_id: ISSUE-CAND-001
+title: ""
+severity: P1
+component: ""
+case_ids:
+  - FQA-001
+run_ids:
+  - RUN-YYYYMMDD-HHMMSS
+failure_ids:
+  - FAIL-FQA-001-01
+expected: ""
+actual: ""
+reproduction:
+  - ""
+evidence:
+  - ""
+suspected_root_cause: null
+labels:
+  - fqa
+approved: false
+created_issue: null

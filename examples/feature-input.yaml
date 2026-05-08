@@ -1,0 +1,22 @@
+feature:
+  name: example-feature
+  description: Feature-level QA input example.
+source:
+  design_doc: null
+  repo: /path/to/repo
+  branch: feature/example
+  commit: null
+  pr: null
+constraints:
+  no_unit_tests: true
+  destructive_cleanup_allowed: false
+  component_restart_allowed: false
+  fault_injection_allowed: false
+expected_outputs:
+  - design-understanding.md
+  - implementation-understanding.md
+  - test-plan.yaml
+  - test cases
+  - test scripts after approval
+  - test report
+  - issue candidates after execution
