@@ -107,6 +107,40 @@ Use $fqa resume fqa-example-20260508-pr123.
 
 ## 使用方式
 
+### 开始 feature QA workflow
+
+当用户要求 FQA 测试一个 feature 时，FQA 使用渐进式 intake。它会先询问
+理解 feature 和生成 case 所需的最小信息；在 case 被批准之前，不会询问
+集群凭证或执行权限。
+
+**输入**
+
+```text
+Use $fqa to test this feature.
+```
+
+**输出**
+
+```text
+State: Drafting
+
+I can start once I know the feature source and test scope.
+
+Please provide one of:
+- PR URL or number
+- branch / commit / diff
+- issue or design document
+- local repo path and changed files
+
+Optional but useful:
+- release target
+- compatibility target
+- must-test scenarios
+- forbidden operations
+
+I will not ask for cluster credentials until test cases are approved.
+```
+
 ### 从 feature branch 生成 case
 
 **输入**

@@ -109,6 +109,41 @@ Use $fqa resume fqa-example-20260508-pr123.
 
 ## Usage
 
+### Start a feature QA workflow
+
+When the user asks FQA to test a feature, FQA uses progressive intake. It first
+asks only for enough context to understand the feature and generate cases. It
+does not ask for cluster credentials or execution permission until the cases
+are approved.
+
+**Input**
+
+```text
+Use $fqa to test this feature.
+```
+
+**Output**
+
+```text
+State: Drafting
+
+I can start once I know the feature source and test scope.
+
+Please provide one of:
+- PR URL or number
+- branch / commit / diff
+- issue or design document
+- local repo path and changed files
+
+Optional but useful:
+- release target
+- compatibility target
+- must-test scenarios
+- forbidden operations
+
+I will not ask for cluster credentials until test cases are approved.
+```
+
 ### Generate cases from a feature branch
 
 **Input**

@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.1.0
+  version: 0.2.0
 ---
 
 # FQA
@@ -82,11 +82,17 @@ resume behavior.
 ## Workflow
 
 1. **Collect inputs**
-   - Feature name or PR/issue/branch/commit.
-   - Design document, if available.
-   - Repository path and code paths.
-   - Test constraints, release target, and forbidden operations.
-   - Create or resume the feature workspace and update `state.yaml`.
+   - Read `references/intake-guidelines.md`.
+   - Choose, create, or resume the feature workspace.
+   - Create `feature-intake.yaml` from `assets/templates/feature-intake.yaml`
+     in the feature workspace.
+   - Collect or infer only the information needed for `Drafting`: feature
+     source, repository, scope, release target, compatibility target, and known
+     forbidden operations.
+   - Mark each intake value as provided, inferred, missing, or not applicable.
+   - Do not request cluster credentials, secrets, endpoint details, or
+     execution permission before test cases are approved.
+   - Update `state.yaml`.
 
 2. **Understand the feature**
    - If a design document exists, summarize it.
@@ -111,6 +117,8 @@ resume behavior.
 5. **Ask for cluster access**
    - After case approval, request endpoint, auth method, namespace, resource
      limits, cleanup permission, and fault-injection permission.
+   - Update `feature-intake.yaml` with cluster details, using aliases for
+     credentials and never storing secrets.
    - Set state to `WaitingCluster` until provided.
 
 6. **Generate scripts**
@@ -159,6 +167,8 @@ Use stable IDs:
 
 - Read `references/workflow.md` for phase details and resume behavior.
 - Read `references/artifact-schema.md` when writing structured artifacts.
+- Read `references/intake-guidelines.md` before asking startup or cluster
+  intake questions.
 - Read `references/test-case-guidelines.md` before generating test cases.
 - Read `references/report-guidelines.md` before writing reports.
 - Read `references/issue-guidelines.md` before creating issue candidates.

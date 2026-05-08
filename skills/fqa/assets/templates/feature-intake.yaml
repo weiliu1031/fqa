@@ -1,0 +1,158 @@
+feature_id: fqa-feature-YYYYMMDD-source
+feature_name:
+  value: ""
+  source: missing
+  confidence: unknown
+  notes: ""
+source:
+  pr:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  issue:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  branch:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  commit:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  diff:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  design_doc:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+repository:
+  repo:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  code_paths:
+    - value: null
+      source: missing
+      confidence: unknown
+      notes: ""
+scope:
+  test_scope:
+    value: "entire feature"
+    source: inferred
+    confidence: inferred
+    notes: "Default when user does not restrict scope."
+  release_target:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  compatibility_target:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+constraints:
+  forbidden_operations:
+    - value: "destructive cleanup"
+      source: inferred
+      confidence: inferred
+      notes: "Default to forbidden until user explicitly allows it."
+    - value: "component restart"
+      source: inferred
+      confidence: inferred
+      notes: "Default to forbidden until user explicitly allows it."
+    - value: "fault injection"
+      source: inferred
+      confidence: inferred
+      notes: "Default to forbidden until user explicitly allows it."
+    - value: "load testing"
+      source: inferred
+      confidence: inferred
+      notes: "Default to forbidden until user explicitly allows it."
+  must_test:
+    - value: null
+      source: missing
+      confidence: unknown
+      notes: ""
+  must_not_test:
+    - value: null
+      source: missing
+      confidence: unknown
+      notes: ""
+cluster:
+  requested_before_case_approval: false
+  endpoint_alias:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "Collect only after test case approval."
+  auth_method:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "Do not store secrets."
+  namespace:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "Collect only after test case approval."
+  resource_prefix:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "Collect only after test case approval."
+  cleanup_allowed:
+    value: false
+    source: inferred
+    confidence: inferred
+    notes: "Default to false until explicitly approved."
+  restart_allowed:
+    value: false
+    source: inferred
+    confidence: inferred
+    notes: "Default to false until explicitly approved."
+  fault_injection_allowed:
+    value: false
+    source: inferred
+    confidence: inferred
+    notes: "Default to false until explicitly approved."
+  resource_budget:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "Collect only after test case approval or when needed for case design."
+observability:
+  logs:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  metrics:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+  traces:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: ""
+questions:
+  blocking:
+    - ""
+  optional:
+    - ""
+assumptions:
+  - ""
+status: drafting

@@ -20,6 +20,7 @@ source:
   pr: null
   issue: null
 artifacts:
+  feature_intake: feature-intake.yaml
   design_understanding: null
   implementation_understanding: null
   test_plan: null

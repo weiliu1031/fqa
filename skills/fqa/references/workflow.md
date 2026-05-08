@@ -20,11 +20,31 @@ Collect feature inputs:
 - Release target and compatibility target.
 - Forbidden operations, such as destructive cleanup or component restarts.
 
+Use progressive intake. Read `references/intake-guidelines.md` before asking
+questions. During `Drafting`, ask only for enough information to understand the
+feature and generate reviewable cases. Do not request cluster credentials,
+secrets, endpoint details, or execution approval before test cases are
+approved.
+
+Minimum inputs before case generation:
+
+- One feature source: PR, issue, branch, commit, diff, design document, or
+  clear feature description.
+- Repository path or repository URL.
+- Test scope: entire feature, selected components, or selected code paths.
+- Release or compatibility target when it materially affects test design.
+- Forbidden operations known at planning time.
+
+When values are unknown but safe defaults exist, continue with explicit
+assumptions. Default destructive cleanup, component restart, fault injection,
+and load testing to not allowed until the user explicitly approves them.
+
 Create or resume the feature workspace before writing artifacts:
 
 ```text
 .fqa/features/<feature_id>/
 ├── state.yaml
+├── feature-intake.yaml
 ├── design-understanding.md
 ├── implementation-understanding.md
 ├── test-plan.yaml
@@ -34,6 +54,13 @@ Create or resume the feature workspace before writing artifacts:
 ├── reports/
 └── issues/
 ```
+
+Create `feature-intake.yaml` from `assets/templates/feature-intake.yaml` after
+the feature workspace exists. Record each intake value as `provided`,
+`inferred`, `missing`, or `not_applicable`. If the user provides a PR, branch,
+commit, design document, or repo path, inspect available source before asking
+follow-up questions. Show the user a compact summary of known, inferred, and
+missing items when a missing item affects the next gate.
 
 `feature_id` must be stable and collision-resistant:
 `fqa-<short-name>-<YYYYMMDD>-<source-id>`. Prefer a PR number, issue number,
@@ -66,6 +93,8 @@ Ask for:
 - Log, metric, trace, and dashboard access.
 
 Treat secrets as sensitive. Do not print credentials in reports.
+Update `feature-intake.yaml` with cluster details after case approval. Store
+credential aliases or auth methods, not secrets.
 
 ### ScriptReady
 
@@ -134,9 +163,12 @@ When resuming:
 1. Locate `.fqa/features/<feature_id>/state.yaml`. If the feature is unknown,
    list candidate feature workspaces and ask the user to choose.
 2. Identify current state from `state.yaml`.
-3. Verify referenced files exist.
-4. Continue from the next incomplete gate.
-5. Do not regenerate earlier artifacts unless the user requests it or inputs
+3. Read `feature-intake.yaml` if it exists. If it is missing for an older
+   workflow, reconstruct it from existing artifacts and mark reconstructed
+   values as `inferred`.
+4. Verify referenced files exist.
+5. Continue from the next incomplete gate.
+6. Do not regenerate earlier artifacts unless the user requests it or inputs
    changed.
 
 For common resume points:

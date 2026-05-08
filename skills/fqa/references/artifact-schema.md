@@ -31,6 +31,7 @@ source:
   pr: string|null
   issue: string|null
 artifacts:
+  feature_intake: string|null
   design_understanding: string|null
   implementation_understanding: string|null
   test_plan: string|null
@@ -63,6 +64,79 @@ approvals:
 notes:
   - string
 ```
+
+## Feature Intake
+
+`feature-intake.yaml` records what the user provided, what the agent inferred,
+and what is still missing. Use it to avoid repeatedly asking the same intake
+questions and to keep assumptions visible.
+
+Every intake item should preserve this shape:
+
+```yaml
+value: string|boolean|array|null
+source: provided|inferred|missing|not_applicable
+confidence: confirmed|inferred|unknown
+notes: string
+```
+
+Top-level structure:
+
+```yaml
+feature_id: string
+feature_name:
+  value: string
+  source: provided|inferred|missing|not_applicable
+  confidence: confirmed|inferred|unknown
+  notes: string
+source:
+  pr: intake_item
+  issue: intake_item
+  branch: intake_item
+  commit: intake_item
+  diff: intake_item
+  design_doc: intake_item
+repository:
+  repo: intake_item
+  code_paths:
+    - intake_item
+scope:
+  test_scope: intake_item
+  release_target: intake_item
+  compatibility_target: intake_item
+constraints:
+  forbidden_operations:
+    - intake_item
+  must_test:
+    - intake_item
+  must_not_test:
+    - intake_item
+cluster:
+  requested_before_case_approval: boolean
+  endpoint_alias: intake_item
+  auth_method: intake_item
+  namespace: intake_item
+  resource_prefix: intake_item
+  cleanup_allowed: intake_item
+  restart_allowed: intake_item
+  fault_injection_allowed: intake_item
+  resource_budget: intake_item
+observability:
+  logs: intake_item
+  metrics: intake_item
+  traces: intake_item
+questions:
+  blocking:
+    - string
+  optional:
+    - string
+assumptions:
+  - string
+status: drafting|case_review|waiting_cluster|script_ready|running|report_review|issue_review|issue_created|waiting_fix|regression|closed
+```
+
+Do not store credentials or raw secrets in this artifact. Store credential
+aliases or auth methods only.
 
 ## Test Plan
 
