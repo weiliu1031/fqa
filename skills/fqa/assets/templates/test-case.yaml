@@ -1,4 +1,6 @@
 case_id: FQA-001
+case_version: 1
+content_hash: ""
 title: ""
 priority: P1
 risk:
@@ -17,6 +19,11 @@ data_requirement:
   datasets:
     - ""
   scale: ""
+regression:
+  components: []
+  code_paths: []
+  risk_tags: []
+  related_cases: []
 steps:
   - step: 1
     action: ""

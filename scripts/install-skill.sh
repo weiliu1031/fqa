@@ -9,4 +9,9 @@ mkdir -p "$TARGET_ROOT"
 rm -rf "$TARGET_DIR"
 cp -R "$ROOT_DIR/skills/fqa" "$TARGET_DIR"
 
-echo "Installed fqa skill to $TARGET_DIR"
+version="$(awk '
+  /^---$/ { fence++; next }
+  fence == 1 && /^[[:space:]]*version:/ { print $2; exit }
+' "$TARGET_DIR/SKILL.md")"
+
+echo "Installed fqa skill $version to $TARGET_DIR"

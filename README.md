@@ -93,6 +93,26 @@ cd fqa
 ./scripts/install-skill.sh
 ```
 
+Update an existing install from a release tag:
+
+```bash
+git fetch --tags
+git checkout v0.3.0
+./scripts/install-skill.sh
+```
+
+Or install directly from GitHub with Codex's skill installer:
+
+```bash
+rm -rf ~/.codex/skills/fqa
+python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
+  --repo weiliu1031/fqa \
+  --path skills/fqa \
+  --ref v0.3.0
+```
+
+Restart Codex after installing or updating the skill.
+
 Validate the skill package:
 
 ```bash
@@ -248,12 +268,17 @@ skills/fqa/
 ├── agents/openai.yaml
 ├── references/
 │   ├── artifact-schema.md
+│   ├── intake-guidelines.md
 │   ├── issue-guidelines.md
 │   ├── report-guidelines.md
 │   ├── test-case-guidelines.md
 │   └── workflow.md
+├── scripts/
+│   ├── fqa_status.py
+│   └── fqa_validate_workspace.py
 └── assets/templates/
     ├── design-understanding.md
+    ├── feature-intake.yaml
     ├── implementation-understanding.md
     ├── issue-candidate.yaml
     ├── state.yaml
@@ -266,7 +291,8 @@ skills/fqa/
 
 The skill keeps the loaded context small. `SKILL.md` contains the state machine
 and guardrails; detailed schemas and writing rules live in `references/`;
-copyable artifact skeletons live in `assets/templates/`.
+copyable artifact skeletons live in `assets/templates/`; deterministic status
+and workspace checks live in `scripts/`.
 
 ## Versioning
 
@@ -281,8 +307,8 @@ Use semantic versioning:
 Create a matching Git tag for published versions:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v<version>
+git push origin v<version>
 ```
 
 ## Security
@@ -297,6 +323,8 @@ When an agent uses FQA on a real feature:
 - Require explicit approval before destructive cleanup, restarts, or fault injection.
 - Require explicit approval before creating external issues.
 - Store generated run artifacts outside source control unless they are sanitized.
+- `.fqa/` is ignored by default because workflow artifacts may contain
+  environment-specific evidence.
 
 ## Contributing
 

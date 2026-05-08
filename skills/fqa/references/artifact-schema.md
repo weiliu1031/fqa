@@ -46,6 +46,9 @@ latest:
 approvals:
   test_cases:
     approved: boolean
+    approved_cases:
+      - case_id: string
+        content_hash: string
     approved_by: string|null
     approved_at: string|null
   cluster_execution:
@@ -161,12 +164,15 @@ risk_model:
 cases:
   - case_id: string
     title: string
+    content_hash: string
 ```
 
 ## Test Case
 
 ```yaml
 case_id: string
+case_version: integer
+content_hash: string
 title: string
 priority: P0|P1|P2|P3
 risk:
@@ -185,6 +191,15 @@ data_requirement:
   datasets:
     - string
   scale: string
+regression:
+  components:
+    - string
+  code_paths:
+    - string
+  risk_tags:
+    - string
+  related_cases:
+    - string
 steps:
   - step: integer
     action: string
@@ -225,6 +240,8 @@ evidence:
   traces:
     - string
   artifacts:
+    - string
+  redactions:
     - string
 failure:
   failure_id: string|null

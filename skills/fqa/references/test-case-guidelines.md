@@ -66,6 +66,8 @@ Each case must be executable by a different engineer without extra context.
 Every case needs:
 
 - A specific risk.
+- A stable content hash once proposed or approved. Use SHA-256 of the case
+  artifact content after review edits.
 - Concrete setup.
 - Exact user or system actions.
 - Observable assertions.
@@ -93,6 +95,8 @@ Before proposing a case, check all quality gates:
 - Diagnostics: failure output tells an engineer where to look next.
 - Isolation: resources are unique to the case and safe for parallel workflows.
 - Cleanup: cleanup is explicit, and failure to clean up is reported.
+- Regression metadata: components, code paths, risk tags, and related cases
+  are filled when they are known.
 
 Reject or rewrite a case if it fails any of these checks.
 

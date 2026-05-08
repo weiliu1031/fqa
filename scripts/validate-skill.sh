@@ -36,6 +36,8 @@ required=(
   "$SKILL_DIR/assets/templates/test-run-result.yaml"
   "$SKILL_DIR/assets/templates/test-report.md"
   "$SKILL_DIR/assets/templates/issue-candidate.yaml"
+  "$SKILL_DIR/scripts/fqa_status.py"
+  "$SKILL_DIR/scripts/fqa_validate_workspace.py"
 )
 
 for path in "${required[@]}"; do
@@ -44,5 +46,24 @@ for path in "${required[@]}"; do
     exit 1
   fi
 done
+
+for script in "$SKILL_DIR/scripts/fqa_status.py" "$SKILL_DIR/scripts/fqa_validate_workspace.py"; do
+  if [[ ! -x "$script" ]]; then
+    echo "Required script is not executable: $script" >&2
+    exit 1
+  fi
+done
+
+python3 "$SKILL_DIR/scripts/fqa_status.py" --help >/dev/null
+python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" --help >/dev/null
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+workspace="$tmp_dir/.fqa/features/fqa-feature-YYYYMMDD-source"
+mkdir -p "$workspace"/{cases,scripts,runs,reports,issues}
+cp "$SKILL_DIR/assets/templates/state.yaml" "$workspace/state.yaml"
+cp "$SKILL_DIR/assets/templates/feature-intake.yaml" "$workspace/feature-intake.yaml"
+python3 "$SKILL_DIR/scripts/fqa_status.py" --root "$tmp_dir" >/dev/null
+python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" "$workspace" >/dev/null
 
 echo "FQA skill resources validated"

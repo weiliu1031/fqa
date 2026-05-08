@@ -5,7 +5,7 @@ component: ""
 case_ids:
   - FQA-001
 run_ids:
-  - RUN-YYYYMMDD-HHMMSS
+  - RUN-YYYYMMDD-HHMMSS-session
 failure_ids:
   - FAIL-FQA-001-01
 expected: ""

@@ -1,4 +1,4 @@
-run_id: RUN-YYYYMMDD-HHMMSS
+run_id: RUN-YYYYMMDD-HHMMSS-session
 case_id: FQA-001
 status: blocked
 started_at: ""
@@ -13,6 +13,7 @@ evidence:
   metrics: []
   traces: []
   artifacts: []
+  redactions: []
 failure:
   failure_id: null
   classification: null

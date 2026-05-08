@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.2.0
+  version: 0.3.0
 ---
 
 # FQA
@@ -79,6 +79,12 @@ If a feature ID is missing or ambiguous, list candidate workflows and ask the
 user to choose. Read `references/workflow.md` for the required status fields and
 resume behavior.
 
+Bundled helper scripts:
+
+- `scripts/fqa_status.py`: summarize all workflows or one workflow.
+- `scripts/fqa_validate_workspace.py`: validate a feature workspace before
+  resume, report, issue creation, or closeout.
+
 ## Workflow
 
 1. **Collect inputs**
@@ -112,6 +118,7 @@ resume behavior.
    - Use one `assets/templates/test-case.yaml` shape per case.
    - Set state to `CaseReview`.
    - Update `state.yaml` with produced artifact paths and approval status.
+   - Record case content hashes when cases are approved.
    - Ask the user to approve, reject, or edit cases.
 
 5. **Ask for cluster access**

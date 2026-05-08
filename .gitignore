@@ -10,3 +10,4 @@ out/
 reports/
 runs/
 artifacts/
+.fqa/

@@ -13,6 +13,8 @@ constraints:
   component_restart_allowed: false
   fault_injection_allowed: false
 expected_outputs:
+  - state.yaml
+  - feature-intake.yaml
   - design-understanding.md
   - implementation-understanding.md
   - test-plan.yaml

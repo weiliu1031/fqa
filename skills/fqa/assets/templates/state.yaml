@@ -35,6 +35,7 @@ latest:
 approvals:
   test_cases:
     approved: false
+    approved_cases: []
     approved_by: null
     approved_at: null
   cluster_execution:

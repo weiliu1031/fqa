@@ -1,4 +1,4 @@
-feature_id: fqa-feature-YYYYMMDD
+feature_id: fqa-feature-YYYYMMDD-source
 feature_name: ""
 state: CaseReview
 source:
@@ -18,8 +18,10 @@ risk_model:
 cases:
   - case_id: FQA-001
     title: ""
+    content_hash: ""
 approval:
   test_cases_approved: false
+  approved_cases: []
   approved_by: null
   approved_at: null
 cluster:

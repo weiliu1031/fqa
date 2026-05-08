@@ -43,6 +43,7 @@ Create or resume the feature workspace before writing artifacts:
 
 ```text
 .fqa/features/<feature_id>/
+├── .lock
 ├── state.yaml
 ├── feature-intake.yaml
 ├── design-understanding.md
@@ -71,6 +72,9 @@ session suffix.
 artifact paths, approvals, and latest run/report pointers. Use paths relative to
 the feature workspace.
 
+Generated workflow artifacts should stay out of source control unless they are
+sanitized examples. In a repository, ignore `.fqa/` by default.
+
 If the design document is missing, inspect code and generate a design
 understanding from observed behavior. Make uncertainty explicit.
 
@@ -78,6 +82,10 @@ understanding from observed behavior. Make uncertainty explicit.
 
 Generate test cases from risks. Stop and ask for review. The user may approve,
 remove, edit, or add cases. Do not generate scripts before approval.
+When cases are approved, record the approved case IDs and content hashes in
+`state.yaml` so later edits cannot silently reuse stale approval.
+Use a SHA-256 hash of the case artifact content after review edits. If a case
+changes after approval, clear its approval until the user approves the new hash.
 
 ### WaitingCluster
 
@@ -101,6 +109,9 @@ credential aliases or auth methods, not secrets.
 Generate one script or script entry point per approved case. Scripts must be
 idempotent where possible, must clean up resources when permitted, and must
 emit structured results.
+Scripts must not require third-party packages unless the generated script also
+documents the dependency. Prefer the standard-library contract in
+`assets/templates/test-script-header.py`.
 
 ### Running
 
@@ -122,6 +133,9 @@ runs/RUN-YYYYMMDD-HHMMSS-<session-id>/
 
 Do not overwrite prior run results. If a case is rerun, write a new result file
 and update `state.yaml` pointers to the latest run.
+Store raw evidence in files when possible and reference artifact paths from
+results. Redact secrets before writing error traces, command output, or config
+snippets to artifacts.
 
 ### ReportReview
 
@@ -167,8 +181,10 @@ When resuming:
    workflow, reconstruct it from existing artifacts and mark reconstructed
    values as `inferred`.
 4. Verify referenced files exist.
-5. Continue from the next incomplete gate.
-6. Do not regenerate earlier artifacts unless the user requests it or inputs
+5. Run `scripts/fqa_validate_workspace.py <workspace>` when available before
+   resuming report, issue, regression, or closeout work.
+6. Continue from the next incomplete gate.
+7. Do not regenerate earlier artifacts unless the user requests it or inputs
    changed.
 
 For common resume points:
@@ -189,6 +205,7 @@ For common resume points:
 When the user asks for FQA status, list workflows by reading every existing
 `.fqa/features/*/state.yaml`. If the directory does not exist or no state files
 exist, report that no FQA workflows were found.
+Use `scripts/fqa_status.py` when available for deterministic output.
 
 Show one row per workflow:
 
@@ -230,11 +247,14 @@ own workspace.
 
 For the same feature:
 
+- Use `.lock` as the feature workspace single-writer marker when writing
+  `state.yaml`, reports, issue candidates, or approval updates. The lock should
+  record session ID, owner, started time, and last update time.
 - If `state.yaml.active_session.status` is `active` and belongs to another
   session, stop before writing and ask whether to take over, wait, or open a
   separate run-only session.
 - A takeover must update `active_session` with the new session ID, owner,
-  timestamp, and takeover note.
+  timestamp, takeover note, and `.lock`.
 - Never mark another session's approval as granted. Approval fields must record
   who approved and when.
 - Runs are append-only and may coexist. State transitions, approvals, reports,
