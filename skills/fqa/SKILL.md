@@ -1,6 +1,8 @@
 ---
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
+metadata:
+  version: 0.1.0
 ---
 
 # FQA

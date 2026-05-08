@@ -233,6 +233,23 @@ The skill keeps the loaded context small. `SKILL.md` contains the state machine
 and guardrails; detailed schemas and writing rules live in `references/`;
 copyable artifact skeletons live in `assets/templates/`.
 
+## Versioning
+
+The skill version lives in `skills/fqa/SKILL.md` as `metadata.version: x.y.z`.
+
+Use semantic versioning:
+
+- Patch: wording, examples, or template fixes that do not change workflow behavior.
+- Minor: new workflow states, artifacts, commands, gates, or resume behavior.
+- Major: incompatible artifact schema, state machine, or approval contract changes.
+
+Create a matching Git tag for published versions:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
 ## Security
 
 FQA is a workflow skill. The repository itself does not connect to external

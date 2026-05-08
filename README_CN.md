@@ -231,6 +231,23 @@ skills/fqa/
 详细 schema 和写作规则放在 `references/`；可复制的产物骨架放在
 `assets/templates/`。
 
+## 版本管理
+
+Skill 版本写在 `skills/fqa/SKILL.md` 的 `metadata.version: x.y.z` 字段中。
+
+使用语义化版本：
+
+- Patch：不改变 workflow 行为的文案、示例或模板修正。
+- Minor：新增 workflow state、artifact、命令、gate 或 resume 行为。
+- Major：不兼容的 artifact schema、状态机或审批契约变更。
+
+发布版本时创建对应 Git tag：
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
 ## 安全
 
 FQA 是一个流程型 skill。这个仓库本身不会连接外部服务、保存凭证，也不会对集群

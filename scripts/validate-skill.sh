@@ -7,6 +7,16 @@ VALIDATOR="${SKILL_CREATOR_VALIDATOR:-$HOME/.codex/skills/.system/skill-creator/
 
 python3 "$VALIDATOR" "$SKILL_DIR"
 
+version="$(awk '
+  /^---$/ { fence++; next }
+  fence == 1 && /^[[:space:]]*version:/ { print $2; exit }
+' "$SKILL_DIR/SKILL.md")"
+
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Invalid or missing FQA skill version: $version" >&2
+  exit 1
+fi
+
 required=(
   "$SKILL_DIR/SKILL.md"
   "$SKILL_DIR/agents/openai.yaml"
