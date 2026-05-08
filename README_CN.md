@@ -101,6 +101,8 @@ cd fqa
 
 ```text
 Use $fqa to generate feature-level test cases for this PR.
+Use $fqa status.
+Use $fqa resume fqa-example-20260508-pr123.
 ```
 
 ## 使用方式
@@ -168,6 +170,35 @@ State: Regression
 - Linked issue IDs to case IDs and run IDs
 - Reran failed and adjacent-risk cases after the fix
 - Updated test-report.md with regression evidence
+```
+
+### 列出并恢复 workflow
+
+**输入**
+
+```text
+Use $fqa status.
+```
+
+**输出**
+
+```text
+Feature ID | Feature | State | Session | Updated | Latest Run | Next Gate
+fqa-example-20260508-pr123 | example | CaseReview | active | 2026-05-08T15:30:00Z | - | approve, reject, or edit test cases
+```
+
+**输入**
+
+```text
+Use $fqa resume fqa-example-20260508-pr123.
+The test cases are approved.
+```
+
+**输出**
+
+```text
+State: WaitingCluster
+Next gate: provide cluster access and execution permission.
 ```
 
 ## 工作原理

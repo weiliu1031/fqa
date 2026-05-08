@@ -103,6 +103,8 @@ Use the skill from an agent session:
 
 ```text
 Use $fqa to generate feature-level test cases for this PR.
+Use $fqa status.
+Use $fqa resume fqa-example-20260508-pr123.
 ```
 
 ## Usage
@@ -170,6 +172,35 @@ State: Regression
 - Linked issue IDs to case IDs and run IDs
 - Reran failed and adjacent-risk cases after the fix
 - Updated test-report.md with regression evidence
+```
+
+### List and resume workflows
+
+**Input**
+
+```text
+Use $fqa status.
+```
+
+**Output**
+
+```text
+Feature ID | Feature | State | Session | Updated | Latest Run | Next Gate
+fqa-example-20260508-pr123 | example | CaseReview | active | 2026-05-08T15:30:00Z | - | approve, reject, or edit test cases
+```
+
+**Input**
+
+```text
+Use $fqa resume fqa-example-20260508-pr123.
+The test cases are approved.
+```
+
+**Output**
+
+```text
+State: WaitingCluster
+Next gate: provide cluster access and execution permission.
 ```
 
 ## How It Works

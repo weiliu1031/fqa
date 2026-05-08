@@ -62,6 +62,21 @@ session is recorded for the same feature, do not overwrite its state unless the
 user confirms takeover or the recorded session is clearly stale. Runs are always
 append-only under `runs/<run_id>/`.
 
+## Status and Resume
+
+Support these user intents:
+
+- `status`, `list`, or `show workflows`: scan `.fqa/features/*/state.yaml` and
+  summarize all workflows.
+- `status <feature_id>`: show one workflow's state, approvals, latest run,
+  latest report, and next required human decision.
+- `resume <feature_id>`: read that workflow's `state.yaml`, verify referenced
+  artifacts exist, and continue from the next incomplete gate.
+
+If a feature ID is missing or ambiguous, list candidate workflows and ask the
+user to choose. Read `references/workflow.md` for the required status fields and
+resume behavior.
+
 ## Workflow
 
 1. **Collect inputs**

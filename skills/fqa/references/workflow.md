@@ -139,6 +139,58 @@ When resuming:
 5. Do not regenerate earlier artifacts unless the user requests it or inputs
    changed.
 
+For common resume points:
+
+- `CaseReview`: summarize proposed cases and ask for approval, rejection, or
+  edits.
+- `WaitingCluster`: ask for missing endpoint, auth method, namespace, resource
+  budget, cleanup permission, and fault-injection permission.
+- `ReportReview`: summarize release signal, failures, blocked coverage, and
+  ask for report acceptance or corrections.
+- `IssueReview`: summarize issue candidates and ask which candidates to create.
+- `WaitingFix`: ask for fix PR, commit, image, or build before regression.
+- `Regression`: rerun failed and adjacent-risk cases, then ask whether results
+  are accepted before closing.
+
+## Status Listing
+
+When the user asks for FQA status, list workflows by reading every existing
+`.fqa/features/*/state.yaml`. If the directory does not exist or no state files
+exist, report that no FQA workflows were found.
+
+Show one row per workflow:
+
+```text
+Feature ID | Feature | State | Session | Updated | Latest Run | Next Gate
+```
+
+Derive `Next Gate` from `state`:
+
+| State | Next Gate |
+| --- | --- |
+| Drafting | finish feature understanding and generate cases |
+| CaseReview | approve, reject, or edit test cases |
+| WaitingCluster | provide cluster access and execution permission |
+| ScriptReady | approve execution on the target cluster |
+| Running | wait for run completion and evidence collection |
+| ReportReview | accept report or request corrections |
+| IssueReview | approve, reject, merge, or edit issue candidates |
+| IssueCreated | provide or track fix references |
+| WaitingFix | provide fix PR, commit, image, or build |
+| Regression | accept regression results or request rerun |
+| Closed | no action required |
+
+For `status <feature_id>`, show:
+
+- Feature ID, feature name, and current state.
+- Source repo, branch, commit, PR, issue, and design doc if present.
+- Active session ID, owner, status, and last update time.
+- Approval status for test cases, cluster execution, issue creation, and
+  closeout.
+- Artifact paths from `state.yaml`.
+- Latest run ID, latest report, and next gate.
+- Any notes.
+
 ## Concurrent Sessions
 
 Different features may be tested at the same time because each feature has its
