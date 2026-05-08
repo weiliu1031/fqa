@@ -79,6 +79,7 @@ stateDiagram-v2
 - Converts feature risk into structured, reviewable test cases.
 - Enforces human gates before script generation, cluster execution, and issue creation.
 - Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
+- Isolates concurrent feature workflows under per-feature workspaces with `state.yaml`.
 - Tracks stable IDs across features, cases, runs, failures, issues, and regressions.
 - Supports cluster-oriented QA without pretending to be a unit-test generator.
 
@@ -120,6 +121,7 @@ No design document is available.
 ```text
 State: CaseReview
 Artifacts:
+- .fqa/features/<feature_id>/state.yaml
 - design-understanding.md
 - implementation-understanding.md
 - test-plan.yaml
@@ -144,7 +146,7 @@ Cleanup is allowed. Component restarts are not allowed.
 State: ReportReview
 Artifacts:
 - scripts/FQA-001.py
-- runs/RUN-20260508-153000/FQA-001.yaml
+- runs/RUN-20260508-153000-session/FQA-001.yaml
 - test-report.md
 
 Failures were classified into product bugs, test bugs, environment issues,
@@ -188,6 +190,7 @@ skills/fqa/
     ├── design-understanding.md
     ├── implementation-understanding.md
     ├── issue-candidate.yaml
+    ├── state.yaml
     ├── test-case.yaml
     ├── test-plan.yaml
     ├── test-report.md

@@ -44,6 +44,24 @@ Drafting
 If the user resumes a workflow, identify the current state from artifacts and
 continue from there. Do not restart unless requested.
 
+## Workspace and State
+
+Before creating any workflow artifact, choose or create a feature workspace:
+
+```text
+.fqa/features/<feature_id>/
+```
+
+Each feature workspace owns exactly one active `state.yaml`. Use
+`assets/templates/state.yaml` when creating it. Store all artifacts for that
+feature under the same workspace so parallel sessions for different features do
+not collide.
+
+When resuming, start from `<feature_workspace>/state.yaml`. If another active
+session is recorded for the same feature, do not overwrite its state unless the
+user confirms takeover or the recorded session is clearly stale. Runs are always
+append-only under `runs/<run_id>/`.
+
 ## Workflow
 
 1. **Collect inputs**
@@ -51,6 +69,7 @@ continue from there. Do not restart unless requested.
    - Design document, if available.
    - Repository path and code paths.
    - Test constraints, release target, and forbidden operations.
+   - Create or resume the feature workspace and update `state.yaml`.
 
 2. **Understand the feature**
    - If a design document exists, summarize it.
@@ -69,6 +88,7 @@ continue from there. Do not restart unless requested.
    - Use `assets/templates/test-plan.yaml`.
    - Use one `assets/templates/test-case.yaml` shape per case.
    - Set state to `CaseReview`.
+   - Update `state.yaml` with produced artifact paths and approval status.
    - Ask the user to approve, reject, or edit cases.
 
 5. **Ask for cluster access**
@@ -86,6 +106,7 @@ continue from there. Do not restart unless requested.
    - Execute only after cluster permission.
    - Record code version, cluster version, config, raw output, logs, metrics,
      and cleanup status.
+   - Write each execution to a new `runs/<run_id>/` directory.
    - Set state to `Running`, then `ReportReview`.
 
 8. **Report and classify failures**
@@ -110,9 +131,9 @@ continue from there. Do not restart unless requested.
 
 Use stable IDs:
 
-- `feature_id`: `fqa-<short-name>-YYYYMMDD`
+- `feature_id`: `fqa-<short-name>-YYYYMMDD-<source-id>`
 - `case_id`: `FQA-<NNN>`
-- `run_id`: `RUN-YYYYMMDD-HHMMSS`
+- `run_id`: `RUN-YYYYMMDD-HHMMSS-<session-id>`
 - `failure_id`: `FAIL-<case_id>-<NN>`
 - `issue_candidate_id`: `ISSUE-CAND-<NN>`
 - `regression_id`: `REG-YYYYMMDD-HHMMSS`

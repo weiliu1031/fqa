@@ -1,0 +1,51 @@
+feature_id: fqa-feature-YYYYMMDD-source
+feature_name: ""
+state: Drafting
+workspace:
+  root: .fqa/features/fqa-feature-YYYYMMDD-source
+  created_at: ""
+  updated_at: ""
+active_session:
+  session_id: SESSION-YYYYMMDD-HHMMSS
+  owner: null
+  status: active
+  started_at: ""
+  updated_at: ""
+  takeover_note: null
+source:
+  design_doc: null
+  repo: null
+  branch: null
+  commit: null
+  pr: null
+  issue: null
+artifacts:
+  design_understanding: null
+  implementation_understanding: null
+  test_plan: null
+  cases_dir: cases
+  scripts_dir: scripts
+  runs_dir: runs
+  reports_dir: reports
+  issues_dir: issues
+latest:
+  run_id: null
+  report: null
+approvals:
+  test_cases:
+    approved: false
+    approved_by: null
+    approved_at: null
+  cluster_execution:
+    approved: false
+    approved_by: null
+    approved_at: null
+  issue_creation:
+    approved_candidates: []
+    approved_by: null
+    approved_at: null
+  closeout:
+    accepted: false
+    accepted_by: null
+    accepted_at: null
+notes: []

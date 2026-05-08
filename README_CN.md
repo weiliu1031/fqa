@@ -77,6 +77,7 @@ stateDiagram-v2
 - 将 feature 风险转换成结构化、可审核的 test case。
 - 在脚本生成、集群执行、issue 创建前强制人工 gate。
 - 提供 test plan、case、script、result、report、issue candidate 等模板。
+- 通过每个 feature 独立 workspace 和 `state.yaml` 隔离并发 workflow。
 - 用稳定 ID 串联 feature、case、run、failure、issue 和 regression。
 - 面向集群级 QA，不把自己伪装成 unit-test 生成器。
 
@@ -118,6 +119,7 @@ No design document is available.
 ```text
 State: CaseReview
 Artifacts:
+- .fqa/features/<feature_id>/state.yaml
 - design-understanding.md
 - implementation-understanding.md
 - test-plan.yaml
@@ -142,7 +144,7 @@ Cleanup is allowed. Component restarts are not allowed.
 State: ReportReview
 Artifacts:
 - scripts/FQA-001.py
-- runs/RUN-20260508-153000/FQA-001.yaml
+- runs/RUN-20260508-153000-session/FQA-001.yaml
 - test-report.md
 
 Failures were classified into product bugs, test bugs, environment issues,
@@ -186,6 +188,7 @@ skills/fqa/
     ├── design-understanding.md
     ├── implementation-understanding.md
     ├── issue-candidate.yaml
+    ├── state.yaml
     ├── test-case.yaml
     ├── test-plan.yaml
     ├── test-report.md

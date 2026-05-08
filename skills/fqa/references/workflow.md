@@ -20,6 +20,30 @@ Collect feature inputs:
 - Release target and compatibility target.
 - Forbidden operations, such as destructive cleanup or component restarts.
 
+Create or resume the feature workspace before writing artifacts:
+
+```text
+.fqa/features/<feature_id>/
+├── state.yaml
+├── design-understanding.md
+├── implementation-understanding.md
+├── test-plan.yaml
+├── cases/
+├── scripts/
+├── runs/
+├── reports/
+└── issues/
+```
+
+`feature_id` must be stable and collision-resistant:
+`fqa-<short-name>-<YYYYMMDD>-<source-id>`. Prefer a PR number, issue number,
+branch slug, or short commit as `source-id`. If none exists, add a short
+session suffix.
+
+`state.yaml` is the source of truth for the active state, current session,
+artifact paths, approvals, and latest run/report pointers. Use paths relative to
+the feature workspace.
+
 If the design document is missing, inspect code and generate a design
 understanding from observed behavior. Make uncertainty explicit.
 
@@ -61,6 +85,15 @@ Record evidence:
 - Logs, metrics, traces, or query outputs used as evidence.
 - Cleanup status.
 
+Every execution creates a new append-only run directory:
+
+```text
+runs/RUN-YYYYMMDD-HHMMSS-<session-id>/
+```
+
+Do not overwrite prior run results. If a case is rerun, write a new result file
+and update `state.yaml` pointers to the latest run.
+
 ### ReportReview
 
 Write a report that is useful for release decisions. Include coverage,
@@ -98,9 +131,28 @@ skipped cases.
 
 When resuming:
 
-1. Locate the latest report or state artifact.
-2. Identify current state.
+1. Locate `.fqa/features/<feature_id>/state.yaml`. If the feature is unknown,
+   list candidate feature workspaces and ask the user to choose.
+2. Identify current state from `state.yaml`.
 3. Verify referenced files exist.
 4. Continue from the next incomplete gate.
 5. Do not regenerate earlier artifacts unless the user requests it or inputs
    changed.
+
+## Concurrent Sessions
+
+Different features may be tested at the same time because each feature has its
+own workspace.
+
+For the same feature:
+
+- If `state.yaml.active_session.status` is `active` and belongs to another
+  session, stop before writing and ask whether to take over, wait, or open a
+  separate run-only session.
+- A takeover must update `active_session` with the new session ID, owner,
+  timestamp, and takeover note.
+- Never mark another session's approval as granted. Approval fields must record
+  who approved and when.
+- Runs are append-only and may coexist. State transitions, approvals, reports,
+  and issue candidates are single-writer updates through `state.yaml`.
+- If a session is clearly stale, explain the evidence before taking over.

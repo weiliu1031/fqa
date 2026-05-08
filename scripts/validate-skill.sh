@@ -17,6 +17,7 @@ required=(
   "$SKILL_DIR/references/issue-guidelines.md"
   "$SKILL_DIR/assets/templates/design-understanding.md"
   "$SKILL_DIR/assets/templates/implementation-understanding.md"
+  "$SKILL_DIR/assets/templates/state.yaml"
   "$SKILL_DIR/assets/templates/test-plan.yaml"
   "$SKILL_DIR/assets/templates/test-case.yaml"
   "$SKILL_DIR/assets/templates/test-script-header.py"
