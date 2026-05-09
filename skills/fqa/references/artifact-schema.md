@@ -5,8 +5,10 @@ human-readable text, but structured blocks should preserve these keys.
 
 ## State Manifest
 
-`state.yaml` is the source of truth for a feature workspace. Store paths
-relative to `.fqa/features/<feature_id>/`.
+`state.yaml` is the source of truth for a feature workspace. Store artifact
+paths relative to `<fqa_base_dir>/features/<feature_id>/` unless an absolute
+path is required for an external source. The canonical base directory resolves
+from `FQA_BASE_DIR`, then `$CODEX_HOME/fqa`, then `~/.codex/fqa`.
 
 ```yaml
 feature_id: string
@@ -14,6 +16,9 @@ feature_name: string
 state: Drafting|CaseReview|WaitingCluster|ScriptReady|Running|ReportReview|IssueReview|IssueCreated|WaitingFix|Regression|Closed
 workspace:
   root: string
+  base_dir: string
+  storage: global|repo_local_legacy
+  legacy_root: string|null
   created_at: string
   updated_at: string
 active_session:
@@ -26,6 +31,8 @@ active_session:
 source:
   design_doc: string|null
   repo: string|null
+  repo_path: string|null
+  worktree_path: string|null
   branch: string|null
   commit: string|null
   pr: string|null
@@ -66,6 +73,29 @@ approvals:
     accepted_at: string|null
 notes:
   - string
+```
+
+## Registry
+
+`registry.yaml` is a best-effort index under `<fqa_base_dir>/registry.yaml`.
+Update it after creating a workspace or changing a workflow state. It is used
+for global status discovery only; reconstruct it from state files if it is
+missing or stale.
+
+```yaml
+version: 1
+updated_at: string
+features:
+  - feature_id: string
+    feature_name: string
+    state: Drafting|CaseReview|WaitingCluster|ScriptReady|Running|ReportReview|IssueReview|IssueCreated|WaitingFix|Regression|Closed
+    workspace: string
+    source_repo: string|null
+    source_repo_path: string|null
+    source_worktree_path: string|null
+    branch: string|null
+    commit: string|null
+    updated_at: string
 ```
 
 ## Feature Intake

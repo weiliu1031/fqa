@@ -39,22 +39,48 @@ When values are unknown but safe defaults exist, continue with explicit
 assumptions. Default destructive cleanup, component restart, fault injection,
 and load testing to not allowed until the user explicitly approves them.
 
-Create or resume the feature workspace before writing artifacts:
+Create or resume the feature workspace before writing artifacts. Resolve the
+canonical FQA base directory first:
+
+1. Use `FQA_BASE_DIR` when it is set.
+2. Otherwise use `$CODEX_HOME/fqa` when `CODEX_HOME` is set.
+3. Otherwise use `~/.codex/fqa`.
+
+New workflow artifacts belong under the canonical base directory, not under an
+individual Git worktree:
 
 ```text
-.fqa/features/<feature_id>/
-├── .lock
-├── state.yaml
-├── feature-intake.yaml
-├── design-understanding.md
-├── implementation-understanding.md
-├── test-plan.yaml
-├── cases/
-├── scripts/
-├── runs/
-├── reports/
-└── issues/
+<fqa_base_dir>/
+├── registry.yaml
+└── features/
+    └── <feature_id>/
+        ├── .lock
+        ├── state.yaml
+        ├── feature-intake.yaml
+        ├── design-understanding.md
+        ├── implementation-understanding.md
+        ├── test-plan.yaml
+        ├── cases/
+        ├── scripts/
+        ├── runs/
+        ├── reports/
+        └── issues/
 ```
+
+Repo-local `.fqa/` directories are compatibility locations only:
+
+```text
+<repo>/.fqa/
+├── .lock
+├── index.yaml
+└── features/<feature_id>.ref
+```
+
+Do not create new canonical artifacts in a repo-local `.fqa/features/`
+directory unless the user explicitly requests local storage. If an older
+repo-local `.fqa/features/<feature_id>/state.yaml` is the only existing state,
+report it as legacy and ask before migrating it to the canonical base or
+continuing in place.
 
 Create `feature-intake.yaml` from `assets/templates/feature-intake.yaml` after
 the feature workspace exists. Record each intake value as `provided`,
@@ -70,10 +96,19 @@ session suffix.
 
 `state.yaml` is the source of truth for the active state, current session,
 artifact paths, approvals, and latest run/report pointers. Use paths relative to
-the feature workspace.
+the feature workspace. Record `workspace.root`, `workspace.base_dir`,
+`workspace.storage`, and the tested `source.repo` / `source.worktree_path`.
+`source.repo` should identify the repository; `source.worktree_path` should
+identify the concrete local checkout used for inspection or execution.
+
+Maintain `<fqa_base_dir>/registry.yaml` after creating or updating a workflow.
+The registry is a best-effort index for status listing across repositories and
+worktrees. It may be reconstructed from `features/*/state.yaml`; never treat it
+as more authoritative than a feature workspace's `state.yaml`.
 
 Generated workflow artifacts should stay out of source control unless they are
-sanitized examples. In a repository, ignore `.fqa/` by default.
+sanitized examples. In a repository, ignore `.fqa/` by default because
+repo-local files are pointers or legacy artifacts, not release content.
 
 If the design document is missing, inspect code and generate a design
 understanding from observed behavior. Make uncertainty explicit.
@@ -174,8 +209,10 @@ skipped cases.
 
 When resuming:
 
-1. Locate `.fqa/features/<feature_id>/state.yaml`. If the feature is unknown,
-   list candidate feature workspaces and ask the user to choose.
+1. Locate `<fqa_base_dir>/features/<feature_id>/state.yaml`. If a repo root is
+   in scope, also check legacy `<repo>/.fqa/features/<feature_id>/state.yaml`.
+   If the feature is unknown, list candidate feature workspaces and ask the
+   user to choose.
 2. Identify current state from `state.yaml`.
 3. Read `feature-intake.yaml` if it exists. If it is missing for an older
    workflow, reconstruct it from existing artifacts and mark reconstructed
@@ -203,8 +240,11 @@ For common resume points:
 ## Status Listing
 
 When the user asks for FQA status, list workflows by reading every existing
-`.fqa/features/*/state.yaml`. If the directory does not exist or no state files
-exist, report that no FQA workflows were found.
+`<fqa_base_dir>/features/*/state.yaml`. If a repo root is in scope, filter
+global workflows to states whose `source.repo`, `source.repo_path`, or
+`source.worktree_path` matches the repo root, and include legacy
+`<repo>/.fqa/features/*/state.yaml`. If no state files exist, report that no
+FQA workflows were found.
 Use `scripts/fqa_status.py` when available for deterministic output.
 
 Show one row per workflow:
@@ -243,7 +283,8 @@ For `status <feature_id>`, show:
 ## Concurrent Sessions
 
 Different features may be tested at the same time because each feature has its
-own workspace.
+own canonical workspace, independent of the Git worktree used to inspect or run
+the feature.
 
 For the same feature:
 

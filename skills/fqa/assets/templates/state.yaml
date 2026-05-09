@@ -2,7 +2,10 @@ feature_id: fqa-feature-YYYYMMDD-source
 feature_name: ""
 state: Drafting
 workspace:
-  root: .fqa/features/fqa-feature-YYYYMMDD-source
+  root: ${FQA_BASE_DIR}/features/fqa-feature-YYYYMMDD-source
+  base_dir: ${FQA_BASE_DIR}
+  storage: global
+  legacy_root: null
   created_at: ""
   updated_at: ""
 active_session:
@@ -15,6 +18,8 @@ active_session:
 source:
   design_doc: null
   repo: null
+  repo_path: null
+  worktree_path: null
   branch: null
   commit: null
   pr: null

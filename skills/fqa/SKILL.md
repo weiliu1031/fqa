@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.3.0
+  version: 0.4.0
 ---
 
 # FQA
@@ -48,28 +48,50 @@ continue from there. Do not restart unless requested.
 
 ## Workspace and State
 
-Before creating any workflow artifact, choose or create a feature workspace:
+Before creating any workflow artifact, choose or create the canonical FQA base
+directory:
 
 ```text
-.fqa/features/<feature_id>/
+${FQA_BASE_DIR:-${CODEX_HOME:-~/.codex}/fqa}
+```
+
+Use this base directory for all new workflow artifacts, even when the tested
+feature lives in a Git worktree. The canonical feature workspace is:
+
+```text
+<fqa_base_dir>/features/<feature_id>/
 ```
 
 Each feature workspace owns exactly one active `state.yaml`. Use
 `assets/templates/state.yaml` when creating it. Store all artifacts for that
-feature under the same workspace so parallel sessions for different features do
-not collide.
+feature under the same canonical workspace so parallel sessions and different
+worktrees do not collide. Record the tested repository and worktree path in
+`state.yaml.source`.
+
+Maintain `<fqa_base_dir>/registry.yaml` as a best-effort index of feature IDs,
+workspace paths, source repositories, source worktrees, and states. The
+registry is an index only; `state.yaml` remains the source of truth. A
+repo-local `.fqa/` directory may contain compatibility pointers, but do not
+create new canonical artifacts there unless the user explicitly requests
+repo-local storage.
 
 When resuming, start from `<feature_workspace>/state.yaml`. If another active
 session is recorded for the same feature, do not overwrite its state unless the
 user confirms takeover or the recorded session is clearly stale. Runs are always
 append-only under `runs/<run_id>/`.
 
+If only an older repo-local `.fqa/features/<feature_id>/state.yaml` exists,
+report it as a legacy workspace and ask before migrating or continuing in
+place.
+
 ## Status and Resume
 
 Support these user intents:
 
-- `status`, `list`, or `show workflows`: scan `.fqa/features/*/state.yaml` and
-  summarize all workflows.
+- `status`, `list`, or `show workflows`: scan
+  `<fqa_base_dir>/features/*/state.yaml` and summarize all workflows. Include
+  legacy repo-local `.fqa/features/*/state.yaml` only when a repo root is in
+  scope.
 - `status <feature_id>`: show one workflow's state, approvals, latest run,
   latest report, and next required human decision.
 - `resume <feature_id>`: read that workflow's `state.yaml`, verify referenced
@@ -81,7 +103,9 @@ resume behavior.
 
 Bundled helper scripts:
 
-- `scripts/fqa_status.py`: summarize all workflows or one workflow.
+- `scripts/fqa_status.py`: summarize global workflows, repo-filtered workflows,
+  or one workflow. It defaults to `$FQA_BASE_DIR`, falling back to
+  `$CODEX_HOME/fqa` or `~/.codex/fqa`.
 - `scripts/fqa_validate_workspace.py`: validate a feature workspace before
   resume, report, issue creation, or closeout.
 
@@ -99,6 +123,8 @@ Bundled helper scripts:
    - Do not request cluster credentials, secrets, endpoint details, or
      execution permission before test cases are approved.
    - Update `state.yaml`.
+   - Update `<fqa_base_dir>/registry.yaml` after creating or changing the
+     workspace.
 
 2. **Understand the feature**
    - If a design document exists, summarize it.

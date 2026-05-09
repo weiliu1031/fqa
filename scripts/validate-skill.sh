@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILL_DIR="$ROOT_DIR/skills/fqa"
 VALIDATOR="${SKILL_CREATOR_VALIDATOR:-$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py}"
 
-python3 "$VALIDATOR" "$SKILL_DIR"
+PYTHONDONTWRITEBYTECODE=1 python3 "$VALIDATOR" "$SKILL_DIR"
 
 version="$(awk '
   /^---$/ { fence++; next }
@@ -54,16 +54,23 @@ for script in "$SKILL_DIR/scripts/fqa_status.py" "$SKILL_DIR/scripts/fqa_validat
   fi
 done
 
-python3 "$SKILL_DIR/scripts/fqa_status.py" --help >/dev/null
-python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" --help >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_status.py" --help >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" --help >/dev/null
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
-workspace="$tmp_dir/.fqa/features/fqa-feature-YYYYMMDD-source"
+base_dir="$tmp_dir/fqa-base"
+workspace="$base_dir/features/fqa-feature-YYYYMMDD-source"
 mkdir -p "$workspace"/{cases,scripts,runs,reports,issues}
 cp "$SKILL_DIR/assets/templates/state.yaml" "$workspace/state.yaml"
 cp "$SKILL_DIR/assets/templates/feature-intake.yaml" "$workspace/feature-intake.yaml"
-python3 "$SKILL_DIR/scripts/fqa_status.py" --root "$tmp_dir" >/dev/null
-python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" "$workspace" >/dev/null
+FQA_BASE_DIR="$base_dir" PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_status.py" >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" "$workspace" >/dev/null
+
+legacy_workspace="$tmp_dir/repo/.fqa/features/fqa-feature-legacy-YYYYMMDD-source"
+mkdir -p "$legacy_workspace"/{cases,scripts,runs,reports,issues}
+cp "$SKILL_DIR/assets/templates/state.yaml" "$legacy_workspace/state.yaml"
+cp "$SKILL_DIR/assets/templates/feature-intake.yaml" "$legacy_workspace/feature-intake.yaml"
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_status.py" --root "$tmp_dir/repo" --legacy-only >/dev/null
 
 echo "FQA skill resources validated"

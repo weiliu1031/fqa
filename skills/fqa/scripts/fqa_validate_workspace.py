@@ -79,7 +79,10 @@ def validate(workspace: str) -> list[str]:
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Validate an FQA feature workspace.")
-    parser.add_argument("workspace", help="Path to .fqa/features/<feature_id>")
+    parser.add_argument(
+        "workspace",
+        help="Path to <fqa_base_dir>/features/<feature_id> or legacy .fqa/features/<feature_id>",
+    )
     args = parser.parse_args(argv)
 
     errors = validate(args.workspace)

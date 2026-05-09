@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List FQA workflow status from .fqa feature workspaces.
+"""List FQA workflow status from global and legacy feature workspaces.
 
 This helper intentionally parses only the simple YAML shape used by FQA
 state.yaml files so it does not add runtime dependencies.
@@ -85,11 +85,50 @@ def nested(data: dict[str, Any], *keys: str, default: Any = "-") -> Any:
     return cur
 
 
-def state_files(root: str) -> list[str]:
-    return sorted(glob.glob(os.path.join(root, ".fqa", "features", "*", "state.yaml")))
+def default_base_dir() -> str:
+    if os.environ.get("FQA_BASE_DIR"):
+        return os.path.expanduser(os.environ["FQA_BASE_DIR"])
+    if os.environ.get("CODEX_HOME"):
+        return os.path.join(os.path.expanduser(os.environ["CODEX_HOME"]), "fqa")
+    return os.path.expanduser("~/.codex/fqa")
 
 
-def summarize(path: str) -> dict[str, Any]:
+def _realpath(path: str | None) -> str | None:
+    if not path or path == "-":
+        return None
+    return os.path.realpath(os.path.expanduser(path))
+
+
+def _state_files_under(pattern_root: str, relative_pattern: str) -> list[str]:
+    pattern = os.path.join(pattern_root, relative_pattern)
+    return sorted(glob.glob(pattern))
+
+
+def global_state_files(base_dir: str) -> list[str]:
+    return _state_files_under(base_dir, os.path.join("features", "*", "state.yaml"))
+
+
+def legacy_state_files(root: str) -> list[str]:
+    return _state_files_under(root, os.path.join(".fqa", "features", "*", "state.yaml"))
+
+
+def _repo_matches(data: dict[str, Any], root: str) -> bool:
+    wanted = _realpath(root)
+    if wanted is None:
+        return True
+    candidates = [
+        nested(data, "source", "repo", default=None),
+        nested(data, "source", "repo_path", default=None),
+        nested(data, "source", "worktree_path", default=None),
+    ]
+    for candidate in candidates:
+        resolved = _realpath(candidate)
+        if resolved == wanted:
+            return True
+    return False
+
+
+def summarize(path: str, storage: str) -> dict[str, Any]:
     data = parse_simple_yaml(path)
     state = str(nested(data, "state", default="unknown"))
     return {
@@ -100,13 +139,25 @@ def summarize(path: str) -> dict[str, Any]:
         "updated": nested(data, "workspace", "updated_at"),
         "latest_run": nested(data, "latest", "run_id"),
         "next_gate": NEXT_GATE.get(state, "inspect state.yaml"),
+        "storage": storage,
+        "repo": nested(data, "source", "repo", default="-"),
+        "worktree": nested(data, "source", "worktree_path", default="-"),
         "path": path,
         "raw": data,
     }
 
 
 def print_table(rows: list[dict[str, Any]]) -> None:
-    headers = ["Feature ID", "Feature", "State", "Session", "Updated", "Latest Run", "Next Gate"]
+    headers = [
+        "Feature ID",
+        "Feature",
+        "State",
+        "Session",
+        "Updated",
+        "Latest Run",
+        "Storage",
+        "Next Gate",
+    ]
     print(" | ".join(headers))
     for row in rows:
         print(
@@ -119,6 +170,7 @@ def print_table(rows: list[dict[str, Any]]) -> None:
                     "session",
                     "updated",
                     "latest_run",
+                    "storage",
                     "next_gate",
                 ]
             )
@@ -131,10 +183,20 @@ def print_detail(row: dict[str, Any]) -> None:
     print(f"Feature: {row['feature']}")
     print(f"State: {row['state']}")
     print(f"Next gate: {row['next_gate']}")
+    print(f"Storage: {row['storage']}")
     print(f"State file: {row['path']}")
     print()
     print("Source:")
-    for key in ["repo", "branch", "commit", "pr", "issue", "design_doc"]:
+    for key in [
+        "repo",
+        "repo_path",
+        "worktree_path",
+        "branch",
+        "commit",
+        "pr",
+        "issue",
+        "design_doc",
+    ]:
         print(f"- {key}: {nested(data, 'source', key)}")
     print()
     print("Session:")
@@ -155,15 +217,45 @@ def print_detail(row: dict[str, Any]) -> None:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Show FQA workflow status.")
     parser.add_argument("feature_id", nargs="?", help="Optional feature_id to show")
-    parser.add_argument("--root", default=".", help="Repository root containing .fqa")
+    parser.add_argument(
+        "--base",
+        default=default_base_dir(),
+        help="FQA base directory containing features/ (default: FQA_BASE_DIR, CODEX_HOME/fqa, or ~/.codex/fqa)",
+    )
+    parser.add_argument(
+        "--root",
+        help="Repository root used to filter global workflows and scan legacy .fqa",
+    )
+    parser.add_argument(
+        "--legacy-only",
+        action="store_true",
+        help="Scan only legacy <root>/.fqa/features workspaces",
+    )
     args = parser.parse_args(argv)
 
-    files = state_files(args.root)
-    if not files:
+    if args.legacy_only and not args.root:
+        print("--legacy-only requires --root", file=sys.stderr)
+        return 2
+
+    rows: list[dict[str, Any]] = []
+    base_dir = os.path.abspath(os.path.expanduser(args.base))
+
+    if not args.legacy_only:
+        for path in global_state_files(base_dir):
+            row = summarize(path, "global")
+            if args.root and not _repo_matches(row["raw"], args.root):
+                continue
+            rows.append(row)
+
+    if args.root:
+        root = os.path.abspath(os.path.expanduser(args.root))
+        rows.extend(summarize(path, "repo_local_legacy") for path in legacy_state_files(root))
+
+    if not rows:
         print("No FQA workflows found.")
         return 0
 
-    rows = [summarize(path) for path in files]
+    rows = sorted(rows, key=lambda row: (str(row["feature_id"]), str(row["path"])))
     if args.feature_id:
         matches = [row for row in rows if row["feature_id"] == args.feature_id]
         if not matches:

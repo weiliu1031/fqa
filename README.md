@@ -79,7 +79,7 @@ stateDiagram-v2
 - Converts feature risk into structured, reviewable test cases.
 - Enforces human gates before script generation, cluster execution, and issue creation.
 - Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
-- Isolates concurrent feature workflows under per-feature workspaces with `state.yaml`.
+- Stores workflows under one global FQA base directory, with per-feature `state.yaml`.
 - Tracks stable IDs across features, cases, runs, failures, issues, and regressions.
 - Supports cluster-oriented QA without pretending to be a unit-test generator.
 
@@ -97,7 +97,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.3.0
+git checkout v0.4.0
 ./scripts/install-skill.sh
 ```
 
@@ -108,7 +108,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.3.0
+  --ref v0.4.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -178,7 +178,7 @@ No design document is available.
 ```text
 State: CaseReview
 Artifacts:
-- .fqa/features/<feature_id>/state.yaml
+- ${FQA_BASE_DIR:-${CODEX_HOME:-~/.codex}/fqa}/features/<feature_id>/state.yaml
 - design-understanding.md
 - implementation-understanding.md
 - test-plan.yaml
@@ -294,6 +294,17 @@ and guardrails; detailed schemas and writing rules live in `references/`;
 copyable artifact skeletons live in `assets/templates/`; deterministic status
 and workspace checks live in `scripts/`.
 
+By default, generated workflow artifacts are stored under one global base
+directory:
+
+```text
+${FQA_BASE_DIR:-${CODEX_HOME:-~/.codex}/fqa}/features/<feature_id>/
+```
+
+This lets `status` and `resume` work across Git worktrees. A repo-local
+`.fqa/` directory is treated as a compatibility location for pointers or legacy
+workflows, not as the default artifact store.
+
 ## Versioning
 
 The skill version lives in `skills/fqa/SKILL.md` as `metadata.version: x.y.z`.
@@ -323,8 +334,9 @@ When an agent uses FQA on a real feature:
 - Require explicit approval before destructive cleanup, restarts, or fault injection.
 - Require explicit approval before creating external issues.
 - Store generated run artifacts outside source control unless they are sanitized.
-- `.fqa/` is ignored by default because workflow artifacts may contain
-  environment-specific evidence.
+- Keep the global FQA base directory outside project source control.
+- `.fqa/` is ignored by default because repo-local pointers or legacy artifacts
+  may contain environment-specific evidence.
 
 ## Contributing
 
