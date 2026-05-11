@@ -25,15 +25,15 @@ source:
   pr: null
   issue: null
 artifacts:
-  feature_intake: feature-intake.yaml
+  feature_intake: intake/feature-intake.yaml
   design_understanding: null
   implementation_understanding: null
   test_plan: null
-  cases_dir: cases
-  scripts_dir: scripts
-  runs_dir: runs
-  reports_dir: reports
-  issues_dir: issues
+  cases_dir: planning/cases
+  scripts_dir: execution/scripts
+  runs_dir: execution/runs
+  reports_dir: closure/reports
+  issues_dir: closure/issues
 latest:
   run_id: null
   report: null

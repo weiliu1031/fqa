@@ -75,6 +75,20 @@ notes:
   - string
 ```
 
+Use the phase directories consistently:
+
+| Artifact | Default path |
+| --- | --- |
+| Intake | `intake/feature-intake.yaml` |
+| Design understanding | `planning/understanding/design-understanding.md` |
+| Implementation understanding | `planning/understanding/implementation-understanding.md` |
+| Test plan | `planning/test-plan.yaml` |
+| Test cases | `planning/cases/` |
+| Test scripts | `execution/scripts/` |
+| Run evidence | `execution/runs/` |
+| Reports | `closure/reports/` |
+| Issue candidates | `closure/issues/` |
+
 ## Registry
 
 `registry.yaml` is a best-effort index under `<fqa_base_dir>/registry.yaml`.
@@ -100,9 +114,9 @@ features:
 
 ## Feature Intake
 
-`feature-intake.yaml` records what the user provided, what the agent inferred,
-and what is still missing. Use it to avoid repeatedly asking the same intake
-questions and to keep assumptions visible.
+`intake/feature-intake.yaml` records what the user provided, what the agent
+inferred, and what is still missing. Use it to avoid repeatedly asking the same
+intake questions and to keep assumptions visible.
 
 Every intake item should preserve this shape:
 

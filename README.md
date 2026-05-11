@@ -42,8 +42,8 @@ Use $fqa to test this feature PR. There is no design doc.
 
 ```text
 State: Drafting
-- Read the code and generated design-understanding.md
-- Generated implementation-understanding.md from changed components
+- Read the code and generated planning/understanding/design-understanding.md
+- Generated planning/understanding/implementation-understanding.md from changed components
 - Built a risk model covering API behavior, recovery, compatibility, and observability
 - Generated FQA-001 through FQA-008 test cases
 
@@ -97,7 +97,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.4.0
+git checkout v0.5.0
 ./scripts/install-skill.sh
 ```
 
@@ -108,7 +108,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.4.0
+  --ref v0.5.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -179,11 +179,11 @@ No design document is available.
 State: CaseReview
 Artifacts:
 - ${FQA_BASE_DIR:-${CODEX_HOME:-~/.codex}/fqa}/features/<feature_id>/state.yaml
-- design-understanding.md
-- implementation-understanding.md
-- test-plan.yaml
-- cases/FQA-001.yaml
-- cases/FQA-002.yaml
+- planning/understanding/design-understanding.md
+- planning/understanding/implementation-understanding.md
+- planning/test-plan.yaml
+- planning/cases/FQA-001.yaml
+- planning/cases/FQA-002.yaml
 
 Waiting for human approval before generating scripts.
 ```
@@ -202,9 +202,9 @@ Cleanup is allowed. Component restarts are not allowed.
 ```text
 State: ReportReview
 Artifacts:
-- scripts/FQA-001.py
-- runs/RUN-20260508-153000-session/FQA-001.yaml
-- test-report.md
+- execution/scripts/FQA-001.py
+- execution/runs/RUN-20260508-153000-session/FQA-001.yaml
+- closure/reports/test-report.md
 
 Failures were classified into product bugs, test bugs, environment issues,
 requirement ambiguity, and blocked coverage.
@@ -226,7 +226,7 @@ State: Regression
 - Created approved issues only
 - Linked issue IDs to case IDs and run IDs
 - Reran failed and adjacent-risk cases after the fix
-- Updated test-report.md with regression evidence
+- Updated closure/reports/test-report.md with regression evidence
 ```
 
 ### List and resume workflows
@@ -299,6 +299,13 @@ directory:
 
 ```text
 ${FQA_BASE_DIR:-${CODEX_HOME:-~/.codex}/fqa}/features/<feature_id>/
+├── state.yaml
+├── intake/
+├── planning/
+│   ├── understanding/
+│   └── cases/
+├── execution/
+└── closure/
 ```
 
 This lets `status` and `resume` work across Git worktrees. A repo-local

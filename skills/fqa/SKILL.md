@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.4.0
+  version: 0.5.0
 ---
 
 # FQA
@@ -68,6 +68,21 @@ feature under the same canonical workspace so parallel sessions and different
 worktrees do not collide. Record the tested repository and worktree path in
 `state.yaml.source`.
 
+Organize artifacts by workflow phase. Keep only `state.yaml` and `.lock` at
+the feature workspace root:
+
+```text
+<feature_workspace>/
+├── .lock
+├── state.yaml
+├── intake/
+├── planning/
+│   ├── understanding/
+│   └── cases/
+├── execution/
+└── closure/
+```
+
 Maintain `<fqa_base_dir>/registry.yaml` as a best-effort index of feature IDs,
 workspace paths, source repositories, source worktrees, and states. The
 registry is an index only; `state.yaml` remains the source of truth. A
@@ -78,7 +93,7 @@ repo-local storage.
 When resuming, start from `<feature_workspace>/state.yaml`. If another active
 session is recorded for the same feature, do not overwrite its state unless the
 user confirms takeover or the recorded session is clearly stale. Runs are always
-append-only under `runs/<run_id>/`.
+append-only under `execution/runs/<run_id>/`.
 
 If only an older repo-local `.fqa/features/<feature_id>/state.yaml` exists,
 report it as a legacy workspace and ask before migrating or continuing in
@@ -115,7 +130,7 @@ Bundled helper scripts:
    - Read `references/intake-guidelines.md`.
    - Choose, create, or resume the feature workspace.
    - Create `feature-intake.yaml` from `assets/templates/feature-intake.yaml`
-     in the feature workspace.
+     under `intake/`.
    - Collect or infer only the information needed for `Drafting`: feature
      source, repository, scope, release target, compatibility target, and known
      forbidden operations.
@@ -129,8 +144,8 @@ Bundled helper scripts:
 2. **Understand the feature**
    - If a design document exists, summarize it.
    - If no design document exists, inspect source code and generate:
-     - `design-understanding.md`
-     - `implementation-understanding.md`
+     - `planning/understanding/design-understanding.md`
+     - `planning/understanding/implementation-understanding.md`
    - Read `references/workflow.md` for the full artifact flow.
 
 3. **Model risk**
@@ -150,7 +165,7 @@ Bundled helper scripts:
 5. **Ask for cluster access**
    - After case approval, request endpoint, auth method, namespace, resource
      limits, cleanup permission, and fault-injection permission.
-   - Update `feature-intake.yaml` with cluster details, using aliases for
+   - Update `intake/feature-intake.yaml` with cluster details, using aliases for
      credentials and never storing secrets.
    - Set state to `WaitingCluster` until provided.
 
@@ -164,7 +179,7 @@ Bundled helper scripts:
    - Execute only after cluster permission.
    - Record code version, cluster version, config, raw output, logs, metrics,
      and cleanup status.
-   - Write each execution to a new `runs/<run_id>/` directory.
+   - Write each execution to a new `execution/runs/<run_id>/` directory.
    - Set state to `Running`, then `ReportReview`.
 
 8. **Report and classify failures**

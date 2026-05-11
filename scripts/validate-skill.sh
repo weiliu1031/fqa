@@ -61,9 +61,9 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 base_dir="$tmp_dir/fqa-base"
 workspace="$base_dir/features/fqa-feature-YYYYMMDD-source"
-mkdir -p "$workspace"/{cases,scripts,runs,reports,issues}
+mkdir -p "$workspace"/{intake,planning/understanding,planning/cases,execution/scripts,execution/runs,closure/reports,closure/issues}
 cp "$SKILL_DIR/assets/templates/state.yaml" "$workspace/state.yaml"
-cp "$SKILL_DIR/assets/templates/feature-intake.yaml" "$workspace/feature-intake.yaml"
+cp "$SKILL_DIR/assets/templates/feature-intake.yaml" "$workspace/intake/feature-intake.yaml"
 FQA_BASE_DIR="$base_dir" PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_status.py" >/dev/null
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" "$workspace" >/dev/null
 

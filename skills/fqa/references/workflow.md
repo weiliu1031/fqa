@@ -56,15 +56,20 @@ individual Git worktree:
     └── <feature_id>/
         ├── .lock
         ├── state.yaml
-        ├── feature-intake.yaml
-        ├── design-understanding.md
-        ├── implementation-understanding.md
-        ├── test-plan.yaml
-        ├── cases/
-        ├── scripts/
-        ├── runs/
-        ├── reports/
-        └── issues/
+        ├── intake/
+        │   └── feature-intake.yaml
+        ├── planning/
+        │   ├── understanding/
+        │   │   ├── design-understanding.md
+        │   │   └── implementation-understanding.md
+        │   ├── test-plan.yaml
+        │   └── cases/
+        ├── execution/
+        │   ├── scripts/
+        │   └── runs/
+        └── closure/
+            ├── reports/
+            └── issues/
 ```
 
 Repo-local `.fqa/` directories are compatibility locations only:
@@ -82,12 +87,13 @@ repo-local `.fqa/features/<feature_id>/state.yaml` is the only existing state,
 report it as legacy and ask before migrating it to the canonical base or
 continuing in place.
 
-Create `feature-intake.yaml` from `assets/templates/feature-intake.yaml` after
-the feature workspace exists. Record each intake value as `provided`,
-`inferred`, `missing`, or `not_applicable`. If the user provides a PR, branch,
-commit, design document, or repo path, inspect available source before asking
-follow-up questions. Show the user a compact summary of known, inferred, and
-missing items when a missing item affects the next gate.
+Create `intake/feature-intake.yaml` from
+`assets/templates/feature-intake.yaml` after the feature workspace exists.
+Record each intake value as `provided`, `inferred`, `missing`, or
+`not_applicable`. If the user provides a PR, branch, commit, design document,
+or repo path, inspect available source before asking follow-up questions. Show
+the user a compact summary of known, inferred, and missing items when a missing
+item affects the next gate.
 
 `feature_id` must be stable and collision-resistant:
 `fqa-<short-name>-<YYYYMMDD>-<source-id>`. Prefer a PR number, issue number,
@@ -100,6 +106,15 @@ the feature workspace. Record `workspace.root`, `workspace.base_dir`,
 `workspace.storage`, and the tested `source.repo` / `source.worktree_path`.
 `source.repo` should identify the repository; `source.worktree_path` should
 identify the concrete local checkout used for inspection or execution.
+
+Use these phase directories for new artifacts:
+
+| Directory | Purpose |
+| --- | --- |
+| `intake/` | User inputs, inferred assumptions, cluster access aliases |
+| `planning/` | Feature understanding, risk model, test plan, reviewed test cases |
+| `execution/` | Generated scripts, append-only run evidence |
+| `closure/` | Reports, issue candidates, final acceptance records |
 
 Maintain `<fqa_base_dir>/registry.yaml` after creating or updating a workflow.
 The registry is a best-effort index for status listing across repositories and
@@ -136,8 +151,8 @@ Ask for:
 - Log, metric, trace, and dashboard access.
 
 Treat secrets as sensitive. Do not print credentials in reports.
-Update `feature-intake.yaml` with cluster details after case approval. Store
-credential aliases or auth methods, not secrets.
+Update `intake/feature-intake.yaml` with cluster details after case approval.
+Store credential aliases or auth methods, not secrets.
 
 ### ScriptReady
 
@@ -163,7 +178,7 @@ Record evidence:
 Every execution creates a new append-only run directory:
 
 ```text
-runs/RUN-YYYYMMDD-HHMMSS-<session-id>/
+execution/runs/RUN-YYYYMMDD-HHMMSS-<session-id>/
 ```
 
 Do not overwrite prior run results. If a case is rerun, write a new result file
@@ -214,9 +229,10 @@ When resuming:
    If the feature is unknown, list candidate feature workspaces and ask the
    user to choose.
 2. Identify current state from `state.yaml`.
-3. Read `feature-intake.yaml` if it exists. If it is missing for an older
-   workflow, reconstruct it from existing artifacts and mark reconstructed
-   values as `inferred`.
+3. Read `intake/feature-intake.yaml` if it exists. If only legacy
+   `feature-intake.yaml` exists at the workspace root, treat the workflow as
+   legacy. If intake is missing for an older workflow, reconstruct it from
+   existing artifacts and mark reconstructed values as `inferred`.
 4. Verify referenced files exist.
 5. Run `scripts/fqa_validate_workspace.py <workspace>` when available before
    resuming report, issue, regression, or closeout work.

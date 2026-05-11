@@ -7,7 +7,8 @@ observable, isolated, and evidence-backed. They are not a broad checklist of
 feature behaviors. A case is useful only if it can reveal a meaningful product
 risk and produce enough evidence for another engineer to diagnose the result.
 
-Use this file before writing `test-plan.yaml` and `cases/FQA-*.yaml`.
+Use this file before writing `planning/test-plan.yaml` and
+`planning/cases/FQA-*.yaml`.
 
 ## Source-to-Risk Derivation
 

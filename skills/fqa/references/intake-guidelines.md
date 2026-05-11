@@ -2,7 +2,7 @@
 
 Use this file when a user asks to start FQA for a feature, PR, branch, issue,
 design document, commit, or implementation. Intake turns the user's first
-request into a traceable `feature-intake.yaml` artifact without asking for
+request into a traceable `intake/feature-intake.yaml` artifact without asking for
 execution credentials too early.
 
 ## Core Principle
@@ -21,8 +21,8 @@ state.
 
 ## Intake Artifact
 
-Create `feature-intake.yaml` in the feature workspace before writing feature
-understanding, test plans, or cases.
+Create `intake/feature-intake.yaml` in the feature workspace before writing
+feature understanding, test plans, or cases.
 
 Record each item with:
 
@@ -31,7 +31,7 @@ Record each item with:
 - `confidence`: `confirmed`, `inferred`, or `unknown`.
 - `notes`: short explanation, evidence path, or open question.
 
-Do not store secrets in `feature-intake.yaml`. Store only an auth method,
+Do not store secrets in `intake/feature-intake.yaml`. Store only an auth method,
 credential alias, or instruction such as "provided out of band".
 
 ## Minimum Drafting Inputs
@@ -187,7 +187,7 @@ do not repeat it back.
 When resuming a workflow:
 
 1. Read `state.yaml`.
-2. Read `feature-intake.yaml` if present.
+2. Read `intake/feature-intake.yaml` if present.
 3. Report known, inferred, and missing intake items only if they affect the
    next gate.
 4. Do not re-ask questions that already have confirmed answers.
