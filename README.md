@@ -44,7 +44,9 @@ Use $fqa to test this feature PR. There is no design doc.
 State: Drafting
 - Read the code and generated planning/understanding/design-understanding.md
 - Generated planning/understanding/implementation-understanding.md from changed components
+- Checked understanding quality for evidence, confidence, and risk seeds
 - Built a risk model covering API behavior, recovery, compatibility, and observability
+- Checked generated cases for traceability, strong oracles, diagnostics, and flakiness controls
 - Generated FQA-001 through FQA-008 test cases
 
 Next gate: Please review and approve the test cases, then provide test-cluster access.
@@ -75,7 +77,10 @@ stateDiagram-v2
 
 ## Key Features
 
-- Generates design and implementation understanding when docs are missing.
+- Generates evidence-backed design and implementation understanding when docs are missing.
+- Checks understanding quality before test-case generation.
+- Traces test-plan risks and cases back to understanding risk seeds.
+- Checks generated cases for coverage, strong oracles, diagnostics, and flakiness controls.
 - Converts feature risk into structured, reviewable test cases.
 - Enforces human gates before script generation, cluster execution, and issue creation.
 - Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
@@ -97,7 +102,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.5.0
+git checkout v0.7.0
 ./scripts/install-skill.sh
 ```
 
@@ -108,7 +113,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.5.0
+  --ref v0.7.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -269,11 +274,14 @@ skills/fqa/
 ├── references/
 │   ├── artifact-schema.md
 │   ├── intake-guidelines.md
+│   ├── understanding-guidelines.md
 │   ├── issue-guidelines.md
 │   ├── report-guidelines.md
 │   ├── test-case-guidelines.md
 │   └── workflow.md
 ├── scripts/
+│   ├── fqa_check_cases.py
+│   ├── fqa_check_understanding.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/

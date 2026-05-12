@@ -200,14 +200,26 @@ source:
   issue: string|null
 risk_model:
   - risk_id: string
+    risk_seed_ids:
+      - string
     area: string
     description: string
     severity: P0|P1|P2|P3
     covered_by:
       - case_id
+coverage_matrix:
+  - area: string
+    risk_seed_ids:
+      - string
+    case_ids:
+      - string
+    status: covered|partial|missing
+    gap: string|null
 cases:
   - case_id: string
     title: string
+    risk_seed_ids:
+      - string
     content_hash: string
 ```
 
@@ -219,8 +231,17 @@ case_version: integer
 content_hash: string
 title: string
 priority: P0|P1|P2|P3
+traceability:
+  risk_seed_ids:
+    - string
+  source_claims:
+    - string
+  source_files:
+    - string
 risk:
   risk_id: string
+  risk_seed_ids:
+    - string
   area: string
   description: string
 preconditions:
@@ -250,6 +271,11 @@ steps:
     expected: string
 assertions:
   - string
+oracle:
+  type: exact_response|data_invariant|state_invariant|compatibility|observability|resource
+  expected: string
+  negative_assertions:
+    - string
 observability:
   logs:
     - string
@@ -257,6 +283,14 @@ observability:
     - string
   traces:
     - string
+diagnostics:
+  failure_triage: string
+  evidence_to_collect:
+    - string
+flakiness_controls:
+  timeout: string
+  polling_interval: string
+  retry_policy: string
 cleanup:
   required: boolean
   method: string

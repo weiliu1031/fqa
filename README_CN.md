@@ -42,7 +42,9 @@ Use $fqa to test this feature PR. There is no design doc.
 State: Drafting
 - Read the code and generated planning/understanding/design-understanding.md
 - Generated planning/understanding/implementation-understanding.md from changed components
+- Checked understanding quality for evidence, confidence, and risk seeds
 - Built a risk model covering API behavior, recovery, compatibility, and observability
+- Checked generated cases for traceability, strong oracles, diagnostics, and flakiness controls
 - Generated FQA-001 through FQA-008 test cases
 
 Next gate: Please review and approve the test cases, then provide test-cluster access.
@@ -73,7 +75,10 @@ stateDiagram-v2
 
 ## 核心特性
 
-- 没有设计文档时，生成 design 和 implementation understanding。
+- 没有设计文档时，生成带 evidence 的 design 和 implementation understanding。
+- 在生成 test case 前检查 understanding 的证据、confidence 和 risk seed。
+- 将 test plan risk 和 case 追溯到 understanding risk seed。
+- 检查生成的 case 是否具备覆盖矩阵、强 oracle、诊断证据和 flakiness 控制。
 - 将 feature 风险转换成结构化、可审核的 test case。
 - 在脚本生成、集群执行、issue 创建前强制人工 gate。
 - 提供 test plan、case、script、result、report、issue candidate 等模板。
@@ -95,7 +100,7 @@ cd fqa
 
 ```bash
 git fetch --tags
-git checkout v0.5.0
+git checkout v0.7.0
 ./scripts/install-skill.sh
 ```
 
@@ -106,7 +111,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.5.0
+  --ref v0.7.0
 ```
 
 安装或更新后需要重启 Codex。
@@ -266,11 +271,14 @@ skills/fqa/
 ├── references/
 │   ├── artifact-schema.md
 │   ├── intake-guidelines.md
+│   ├── understanding-guidelines.md
 │   ├── issue-guidelines.md
 │   ├── report-guidelines.md
 │   ├── test-case-guidelines.md
 │   └── workflow.md
 ├── scripts/
+│   ├── fqa_check_cases.py
+│   ├── fqa_check_understanding.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/

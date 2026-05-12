@@ -43,6 +43,9 @@ Because <source behavior or change>, users could hit <failure mode>, causing
 ```
 
 Only keep the case if the risk and observable assertion are both specific.
+Every retained risk must trace back to one or more `risk_seed_id` values from
+`planning/understanding/design-understanding.md` or
+`planning/understanding/implementation-understanding.md`.
 
 ## Coverage Areas
 
@@ -67,11 +70,18 @@ Each case must be executable by a different engineer without extra context.
 Every case needs:
 
 - A specific risk.
+- One or more `risk_seed_ids` that identify the understanding-derived risk
+  seed.
+- Traceability to source claims and files.
 - A stable content hash once proposed or approved. Use SHA-256 of the case
   artifact content after review edits.
 - Concrete setup.
 - Exact user or system actions.
 - Observable assertions.
+- A named oracle type and exact expected result.
+- Negative assertions when the feature can fail silently or partially.
+- Diagnostic evidence to collect on failure.
+- Flakiness controls: timeout, polling interval, and retry policy.
 - Required cluster capability.
 - Cleanup plan.
 - Priority.
@@ -84,22 +94,58 @@ Before proposing a case, check all quality gates:
 - Risk: names one concrete failure mode and user or release impact.
 - Source traceability: points back to a design claim, code path, API contract,
   config, compatibility promise, or observed implementation behavior.
+- Understanding traceability: references a `RS-DESIGN-*` or `RS-IMPL-*`
+  risk seed.
 - Minimal scope: exercises one diagnostic risk, not several unrelated risks.
 - Deterministic setup: resource names, data shape, topology, config, and
   permissions are explicit.
 - Exact action: user or system steps are ordered and reproducible.
 - Strong oracle: assertions compare against exact data, state, status, error
   text, metric, log pattern, or trace attribute.
+- Oracle type: `oracle.type` is one of exact response, data invariant, state
+  invariant, compatibility, observability, or resource.
 - Negative evidence: when applicable, asserts what must not happen, such as
   no partial data, no duplicate task, no leaked resource, or no silent retry
   loop.
 - Diagnostics: failure output tells an engineer where to look next.
+- Flakiness controls: timing-sensitive cases define timeout, polling interval,
+  and retry policy.
 - Isolation: resources are unique to the case and safe for parallel workflows.
 - Cleanup: cleanup is explicit, and failure to clean up is reported.
 - Regression metadata: components, code paths, risk tags, and related cases
   are filled when they are known.
 
 Reject or rewrite a case if it fails any of these checks.
+
+Before moving to `CaseReview`, run `scripts/fqa_check_cases.py
+<feature_workspace>` when available. Treat checker failures as rewrite
+instructions, not as user-facing test cases.
+
+## Coverage Matrix
+
+`planning/test-plan.yaml` must include a `coverage_matrix` mapping
+understanding risk seeds to case IDs.
+
+Use `covered` only when at least one case has a strong oracle for the risk
+seed. Use `partial` when a case touches the area but misses an important
+assertion, failure mode, scale, compatibility path, or diagnostic signal. Use
+`missing` when no case covers the seed; explain the gap.
+
+Do not drop a high-priority risk seed because it is hard to execute. Mark it
+as `missing` or `partial` and ask for a human decision at case review.
+
+## Weak Case Blacklist
+
+Rewrite cases with these patterns before review:
+
+- "Verify feature works"
+- "Test error handling"
+- "Test performance"
+- "Check logs"
+- "Test compatibility"
+- "Run basic workflow"
+- Assertions containing only "succeeds", "works", "is normal", "is
+  acceptable", or "does not fail"
 
 ## Test Oracle Design
 

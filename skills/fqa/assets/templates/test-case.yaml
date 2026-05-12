@@ -3,8 +3,17 @@ case_version: 1
 content_hash: ""
 title: ""
 priority: P1
+traceability:
+  risk_seed_ids:
+    - RS-DESIGN-001
+  source_claims:
+    - ""
+  source_files:
+    - ""
 risk:
   risk_id: RISK-001
+  risk_seed_ids:
+    - RS-DESIGN-001
   area: ""
   description: ""
 preconditions:
@@ -30,6 +39,11 @@ steps:
     expected: ""
 assertions:
   - ""
+oracle:
+  type: exact_response|data_invariant|state_invariant|compatibility|observability|resource
+  expected: ""
+  negative_assertions:
+    - ""
 observability:
   logs:
     - ""
@@ -37,6 +51,14 @@ observability:
     - ""
   traces:
     - ""
+diagnostics:
+  failure_triage: ""
+  evidence_to_collect:
+    - ""
+flakiness_controls:
+  timeout: ""
+  polling_interval: ""
+  retry_policy: ""
 cleanup:
   required: true
   method: ""

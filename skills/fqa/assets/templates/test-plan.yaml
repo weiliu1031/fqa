@@ -10,14 +10,27 @@ source:
   issue: null
 risk_model:
   - risk_id: RISK-001
+    risk_seed_ids:
+      - RS-DESIGN-001
+      - RS-IMPL-001
     area: primary_workflow
     description: ""
     severity: P1
     covered_by:
       - FQA-001
+coverage_matrix:
+  - area: primary_workflow
+    risk_seed_ids:
+      - RS-DESIGN-001
+    case_ids:
+      - FQA-001
+    status: covered|partial|missing
+    gap: ""
 cases:
   - case_id: FQA-001
     title: ""
+    risk_seed_ids:
+      - RS-DESIGN-001
     content_hash: ""
 approval:
   test_cases_approved: false

@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.5.0
+  version: 0.7.0
 ---
 
 # FQA
@@ -142,10 +142,18 @@ Bundled helper scripts:
      workspace.
 
 2. **Understand the feature**
+   - Read `references/understanding-guidelines.md`.
    - If a design document exists, summarize it.
    - If no design document exists, inspect source code and generate:
      - `planning/understanding/design-understanding.md`
      - `planning/understanding/implementation-understanding.md`
+   - Bind every major design or implementation claim to evidence and a
+     confidence level.
+   - Generate risk seeds from the understanding artifacts.
+   - Run `scripts/fqa_check_understanding.py <feature_workspace>` when
+     available. Do not proceed to test cases until missing evidence,
+     confidence, and risk-seed sections are fixed or explicitly marked
+     unknown.
    - Read `references/workflow.md` for the full artifact flow.
 
 3. **Model risk**
@@ -157,6 +165,16 @@ Bundled helper scripts:
 4. **Generate test plan and test cases**
    - Use `assets/templates/test-plan.yaml`.
    - Use one `assets/templates/test-case.yaml` shape per case.
+   - Each risk and case must trace back to a risk seed from the understanding
+     artifacts.
+   - Generate a coverage matrix that maps risk seeds to cases and marks
+     uncovered or partially covered areas.
+   - Critique generated cases against `references/test-case-guidelines.md`.
+     Rewrite weak cases before presenting them for review.
+   - Run `scripts/fqa_check_cases.py <feature_workspace>` when available. Do
+     not enter `CaseReview` until weak oracle, missing traceability, missing
+     diagnostics, and missing flakiness-control findings are fixed or
+     explicitly marked not applicable.
    - Set state to `CaseReview`.
    - Update `state.yaml` with produced artifact paths and approval status.
    - Record case content hashes when cases are approved.
@@ -217,6 +235,8 @@ Use stable IDs:
 - Read `references/artifact-schema.md` when writing structured artifacts.
 - Read `references/intake-guidelines.md` before asking startup or cluster
   intake questions.
+- Read `references/understanding-guidelines.md` before generating
+  `planning/understanding/*`.
 - Read `references/test-case-guidelines.md` before generating test cases.
 - Read `references/report-guidelines.md` before writing reports.
 - Read `references/issue-guidelines.md` before creating issue candidates.
