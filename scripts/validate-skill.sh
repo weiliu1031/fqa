@@ -43,6 +43,7 @@ required=(
   "$SKILL_DIR/scripts/fqa_check_understanding.py"
   "$SKILL_DIR/scripts/fqa_check_cases.py"
   "$SKILL_DIR/scripts/fqa_clean.py"
+  "$SKILL_DIR/scripts/fqa_local_milvus.py"
 )
 
 for path in "${required[@]}"; do
@@ -57,7 +58,8 @@ for script in \
   "$SKILL_DIR/scripts/fqa_validate_workspace.py" \
   "$SKILL_DIR/scripts/fqa_check_understanding.py" \
   "$SKILL_DIR/scripts/fqa_check_cases.py" \
-  "$SKILL_DIR/scripts/fqa_clean.py"; do
+  "$SKILL_DIR/scripts/fqa_clean.py" \
+  "$SKILL_DIR/scripts/fqa_local_milvus.py"; do
   if [[ ! -x "$script" ]]; then
     echo "Required script is not executable: $script" >&2
     exit 1
@@ -69,6 +71,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py"
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_understanding.py" --help >/dev/null
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" --help >/dev/null
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_clean.py" --help >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_local_milvus.py" --help >/dev/null
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -220,6 +223,23 @@ coverage_matrix:
       - FQA-001
     status: covered
     gap: none
+dimension_coverage:
+  - dimension: validation_fixture
+    applies_when: local validation fixture
+    status: not_applicable
+    required:
+      operations: []
+      element_types: []
+      boundaries: []
+      system_modes: []
+    covered:
+      append_element_types: []
+      remove_element_types: []
+      boundaries: []
+      system_modes: []
+    scenario_ids:
+      - SCN-001
+    gaps: []
 scenario_matrix:
   - scenario_id: SCN-001
     risk_id: RISK-001
@@ -280,6 +300,13 @@ risk:
 preconditions:
   - validation workspace contains a generated case file
 cluster_requirement:
+  execution_modes:
+    local:
+      supported: true
+      skip_reason: null
+    remote:
+      supported: true
+      skip_reason: null
   topology: local validation
   permissions:
     cleanup: false
@@ -329,6 +356,213 @@ cleanup:
 status: proposed
 EOF_CASE
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" "$workspace" >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_local_milvus.py" \
+  --feature-id fqa-feature-YYYYMMDD-source \
+  --repo-url https://github.com/milvus-io/milvus.git \
+  --worktree-root "$tmp_dir/worktrees" \
+  --no-build \
+  --no-start >/dev/null
+
+negative_dir="$tmp_dir/negative"
+mkdir -p "$negative_dir"/{missing-array-dim,covered-gap,decision-mixing}/planning/cases
+cp "$workspace/planning/cases/FQA-001.yaml" "$negative_dir/missing-array-dim/planning/cases/FQA-001.yaml"
+cp "$workspace/planning/cases/FQA-001.yaml" "$negative_dir/covered-gap/planning/cases/FQA-001.yaml"
+cp "$workspace/planning/cases/FQA-001.yaml" "$negative_dir/decision-mixing/planning/cases/FQA-001.yaml"
+cat > "$negative_dir/missing-array-dim/planning/test-plan.yaml" <<'EOF_NEG_ARRAY'
+feature_id: fqa-negative-array
+feature_name: ARRAY_APPEND / ARRAY_REMOVE negative fixture
+state: CaseReview
+risk_model:
+  - risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    area: primary_workflow
+    description: array partial update fixture
+    severity: P0
+    covered_by: [FQA-001]
+coverage_matrix:
+  - area: primary_workflow
+    risk_seed_ids: [RS-DESIGN-001]
+    case_ids: [FQA-001]
+    status: covered
+    gap: none
+dimension_coverage:
+  - dimension: array_partial_update
+    applies_when: ARRAY_APPEND and ARRAY_REMOVE change Array field behavior
+    status: covered
+    required:
+      operations: [append, remove]
+      element_types: [Bool, Int8, Int16, Int32, Int64, Float, Double, VarChar]
+      boundaries: [empty_base, single_element, duplicate, no_match, remove_all, exact_capacity, overflow, varchar_max_length]
+      system_modes: [multi_field, mixed_insert_update, flush_reload_filter, compatibility, concurrency, sdk]
+    covered:
+      append_element_types: [Bool, Int8, Int16, Int32, Int64, Float, Double, VarChar]
+      remove_element_types: [Bool, Float, Double, VarChar]
+      boundaries: [duplicate, no_match, exact_capacity, overflow]
+      system_modes: [multi_field, flush_reload_filter]
+    scenario_ids: [SCN-001]
+    gaps: []
+scenario_matrix:
+  - scenario_id: SCN-001
+    risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    case_id: FQA-001
+    priority: P0
+    category: type_variant
+    parameters: {element_type: Bool|Float|Double|VarChar, operation: remove, boundary: duplicate}
+    setup: array fixture
+    action: run array partial update
+    expected: exact result
+    decision_status: confirmed
+    notes: negative fixture
+cases:
+  - case_id: FQA-001
+    title: negative fixture
+    risk_seed_ids: [RS-DESIGN-001]
+    content_hash: validationhash
+EOF_NEG_ARRAY
+if PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" \
+  "$negative_dir/missing-array-dim" >/dev/null 2>&1; then
+  echo "fqa_check_cases accepted missing array dimension coverage" >&2
+  exit 1
+fi
+
+cat > "$negative_dir/covered-gap/planning/test-plan.yaml" <<'EOF_NEG_GAP'
+feature_id: fqa-negative-covered-gap
+feature_name: covered gap negative fixture
+state: CaseReview
+risk_model:
+  - risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    area: compatibility
+    description: compatibility fixture
+    severity: P1
+    covered_by: [FQA-001]
+coverage_matrix:
+  - area: compatibility
+    risk_seed_ids: [RS-DESIGN-001]
+    case_ids: [FQA-001]
+    status: covered
+    gap: Requires old-version cluster after approval.
+dimension_coverage:
+  - dimension: compatibility_fixture
+    applies_when: compatibility environment exists
+    status: not_applicable
+    required:
+      operations: []
+      element_types: []
+      boundaries: []
+      system_modes: []
+    covered:
+      append_element_types: []
+      remove_element_types: []
+      boundaries: []
+      system_modes: []
+    scenario_ids: [SCN-001]
+    gaps: []
+scenario_matrix:
+  - scenario_id: SCN-001
+    risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    case_id: FQA-001
+    priority: P1
+    category: compatibility
+    parameters: {element_type: null, operation: null, boundary: null}
+    setup: compatibility fixture
+    action: compare versions
+    expected: exact compatibility result
+    decision_status: confirmed
+    notes: negative fixture
+cases:
+  - case_id: FQA-001
+    title: negative fixture
+    risk_seed_ids: [RS-DESIGN-001]
+    content_hash: validationhash
+EOF_NEG_GAP
+if PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" \
+  "$negative_dir/covered-gap" >/dev/null 2>&1; then
+  echo "fqa_check_cases accepted covered coverage row with unresolved gap" >&2
+  exit 1
+fi
+
+cat > "$negative_dir/decision-mixing/planning/test-plan.yaml" <<'EOF_NEG_DECISION'
+feature_id: fqa-negative-decision-mixing
+feature_name: decision mixing negative fixture
+state: CaseReview
+risk_model:
+  - risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    area: boundary
+    description: decision mixing fixture
+    severity: P1
+    covered_by: [FQA-001]
+coverage_matrix:
+  - area: boundary
+    risk_seed_ids: [RS-DESIGN-001]
+    case_ids: [FQA-001]
+    status: partial
+    gap: pending product decision
+dimension_coverage:
+  - dimension: decision_fixture
+    applies_when: pending semantics exist
+    status: partial
+    required:
+      operations: [append]
+      element_types: []
+      boundaries: [null_payload]
+      system_modes: []
+    covered:
+      append_element_types: []
+      remove_element_types: []
+      boundaries: []
+      system_modes: []
+    scenario_ids: [SCN-001, SCN-002]
+    gaps:
+      - null payload decision is pending
+scenario_matrix:
+  - scenario_id: SCN-001
+    risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    case_id: FQA-001
+    priority: P1
+    category: boundary
+    parameters: {element_type: Int64, operation: append, boundary: single_element}
+    setup: decision fixture
+    action: append value
+    expected: exact result
+    decision_status: confirmed
+    notes: confirmed scenario
+  - scenario_id: SCN-002
+    risk_id: RISK-001
+    risk_seed_ids: [RS-DESIGN-001]
+    case_id: FQA-001
+    priority: P1
+    category: boundary
+    parameters: {element_type: Int64, operation: append, boundary: null_payload}
+    setup: decision fixture
+    action: append null payload
+    expected: pending decision
+    decision_status: needs_decision
+    notes: unresolved scenario
+open_decisions:
+  - decision_id: DEC-001
+    scenario_ids: [SCN-002]
+    question: decide null payload behavior
+    options:
+      - reject null payload
+    impact: pass criteria
+    owner: product
+    status: needs_decision
+cases:
+  - case_id: FQA-001
+    title: negative fixture
+    risk_seed_ids: [RS-DESIGN-001]
+    content_hash: validationhash
+EOF_NEG_DECISION
+if PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" \
+  "$negative_dir/decision-mixing" >/dev/null 2>&1; then
+  echo "fqa_check_cases accepted confirmed and needs_decision scenarios in one case" >&2
+  exit 1
+fi
 
 cat > "$base_dir/registry.yaml" <<EOF_REGISTRY
 version: 1

@@ -165,6 +165,16 @@ constraints:
     - intake_item
 cluster:
   requested_before_case_approval: boolean
+  test_mode: intake_item              # local|remote|null
+  local:
+    worktree_path: intake_item
+    seed_repo: intake_item
+    build_required: intake_item
+    start_required: intake_item
+    skip_large_data: intake_item
+  remote:
+    endpoint_alias: intake_item
+    token_alias: intake_item
   endpoint_alias: intake_item
   auth_method: intake_item
   namespace: intake_item
@@ -220,6 +230,32 @@ coverage_matrix:
       - string
     status: covered|partial|missing
     gap: string|null
+dimension_coverage:
+  - dimension: string
+    applies_when: string
+    status: covered|partial|missing|not_applicable
+    required:
+      operations:
+        - string
+      element_types:
+        - string
+      boundaries:
+        - string
+      system_modes:
+        - string
+    covered:
+      append_element_types:
+        - string
+      remove_element_types:
+        - string
+      boundaries:
+        - string
+      system_modes:
+        - string
+    scenario_ids:
+      - string
+    gaps:
+      - string
 scenario_matrix:
   - scenario_id: string
     risk_id: string
@@ -253,6 +289,19 @@ cases:
     risk_seed_ids:
       - string
     content_hash: string
+cluster:
+  provided: boolean
+  test_mode: local|remote|null
+  local:
+    worktree_path: string|null
+    skip_large_data: boolean
+  remote:
+    endpoint_alias: string|null
+    token_alias: string|null
+  endpoint_alias: string|null
+  cleanup_allowed: boolean
+  restart_allowed: boolean
+  fault_injection_allowed: boolean
 ```
 
 ## Test Case
@@ -279,6 +328,13 @@ risk:
 preconditions:
   - string
 cluster_requirement:
+  execution_modes:
+    local:
+      supported: boolean
+      skip_reason: string|null
+    remote:
+      supported: boolean
+      skip_reason: string|null
   topology: string
   permissions:
     cleanup: boolean

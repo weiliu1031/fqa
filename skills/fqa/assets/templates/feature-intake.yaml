@@ -92,6 +92,48 @@ constraints:
       notes: ""
 cluster:
   requested_before_case_approval: false
+  test_mode:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "local or remote; collect after test case approval unless user provided it."
+  local:
+    worktree_path:
+      value: null
+      source: missing
+      confidence: unknown
+      notes: "Milvus worktree used for local build and execution."
+    seed_repo:
+      value: null
+      source: missing
+      confidence: unknown
+      notes: "Existing Milvus repo used to locate or create git worktrees."
+    build_required:
+      value: true
+      source: inferred
+      confidence: inferred
+      notes: "Local mode builds Milvus before execution unless explicitly skipped."
+    start_required:
+      value: true
+      source: inferred
+      confidence: inferred
+      notes: "Local mode starts local standalone Milvus unless already running."
+    skip_large_data:
+      value: true
+      source: inferred
+      confidence: inferred
+      notes: "Local mode skips large-data/load-oriented cases by default."
+  remote:
+    endpoint_alias:
+      value: null
+      source: missing
+      confidence: unknown
+      notes: "Remote endpoint alias; collect only after test case approval."
+    token_alias:
+      value: null
+      source: missing
+      confidence: unknown
+      notes: "Credential alias only; never store raw tokens."
   endpoint_alias:
     value: null
     source: missing

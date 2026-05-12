@@ -28,6 +28,9 @@ CASE_REQUIRED_PATTERNS = {
     "risk seed id": r"RS-(DESIGN|IMPL)-\d+",
     "source claims": r"source_claims:",
     "source files": r"source_files:",
+    "execution modes": r"execution_modes:",
+    "local mode support": r"local:\n\s+supported:\s*(true|false)",
+    "remote mode support": r"remote:\n\s+supported:\s*(true|false)",
     "oracle section": r"^oracle:",
     "oracle type": r"type:\s*(exact_response|data_invariant|state_invariant|compatibility|observability|resource)",
     "oracle expected": r"expected:\s*\S",
@@ -44,12 +47,54 @@ CASE_REQUIRED_PATTERNS = {
 
 PLAN_REQUIRED_PATTERNS = {
     "coverage matrix": r"^coverage_matrix:",
+    "dimension coverage": r"^dimension_coverage:",
     "scenario matrix": r"^scenario_matrix:",
     "coverage status": r"status:\s*(covered|partial|missing)",
     "risk seed id": r"RS-(DESIGN|IMPL)-\d+",
     "scenario id": r"SCN-\d+",
     "scenario category": r"category:\s*(type_variant|operation_variant|validation|boundary|system_mode|compatibility|concurrency|other)",
     "decision status": r"decision_status:\s*(confirmed|needs_decision|not_applicable)",
+}
+
+BLOCKED_GAP_PATTERNS = [
+    r"\brequires?\b",
+    r"\bdepends on\b",
+    r"\bcan be skipped\b",
+    r"\bif no\b",
+    r"\bneeds? decision\b",
+    r"\bpending\b",
+    r"\bnot available\b",
+    r"\bafter .*approval\b",
+]
+
+ARRAY_REQUIRED_APPEND_TYPES = {
+    "Bool",
+    "Int8",
+    "Int16",
+    "Int32",
+    "Int64",
+    "Float",
+    "Double",
+    "VarChar",
+}
+ARRAY_REQUIRED_REMOVE_TYPES = ARRAY_REQUIRED_APPEND_TYPES
+ARRAY_REQUIRED_BOUNDARIES = {
+    "empty_base",
+    "single_element",
+    "duplicate",
+    "no_match",
+    "remove_all",
+    "exact_capacity",
+    "overflow",
+    "varchar_max_length",
+}
+ARRAY_REQUIRED_SYSTEM_MODES = {
+    "multi_field",
+    "mixed_insert_update",
+    "flush_reload_filter",
+    "compatibility",
+    "concurrency",
+    "sdk",
 }
 
 
@@ -88,6 +133,174 @@ def _check_weak_patterns(path: str, content: str) -> list[str]:
     return errors
 
 
+def _split_top_level_blocks(content: str, key: str) -> list[str]:
+    match = re.search(rf"^{re.escape(key)}:\n", content, re.MULTILINE)
+    if not match:
+        return []
+    start = match.end()
+    next_top = re.search(r"^[a-zA-Z_]+:\n", content[start:], re.MULTILINE)
+    section = content[start:] if not next_top else content[start : start + next_top.start()]
+    starts = list(re.finditer(r"^  - ", section, re.MULTILINE))
+    if not starts:
+        return []
+    blocks: list[str] = []
+    for index, item in enumerate(starts):
+        end = starts[index + 1].start() if index + 1 < len(starts) else len(section)
+        blocks.append(section[item.start() : end])
+    return blocks
+
+
+def _extract_inline_list(block: str, key: str) -> set[str]:
+    match = re.search(rf"{re.escape(key)}:\s*\[(?P<items>[^\]]*)\]", block)
+    if not match:
+        return set()
+    return {
+        item.strip().strip("'\"")
+        for item in match.group("items").split(",")
+        if item.strip()
+    }
+
+
+def _extract_block_list(block: str, key: str) -> set[str]:
+    lines = block.splitlines()
+    values: set[str] = set()
+    for index, line in enumerate(lines):
+        if not re.match(rf"\s*{re.escape(key)}:\s*$", line):
+            continue
+        base_indent = len(line) - len(line.lstrip(" "))
+        for child in lines[index + 1 :]:
+            if not child.strip():
+                continue
+            indent = len(child) - len(child.lstrip(" "))
+            if indent <= base_indent:
+                break
+            item = re.match(r"\s*-\s+(.+?)\s*$", child)
+            if item:
+                values.add(item.group(1).strip().strip("'\""))
+    return values
+
+
+def _extract_list(block: str, key: str) -> set[str]:
+    return _extract_inline_list(block, key) or _extract_block_list(block, key)
+
+
+def _extract_mapping_section(block: str, key: str) -> str:
+    lines = block.splitlines()
+    for index, line in enumerate(lines):
+        if not re.match(rf"\s*{re.escape(key)}:\s*$", line):
+            continue
+        base_indent = len(line) - len(line.lstrip(" "))
+        section: list[str] = []
+        for child in lines[index + 1 :]:
+            if not child.strip():
+                section.append(child)
+                continue
+            indent = len(child) - len(child.lstrip(" "))
+            if indent <= base_indent:
+                break
+            section.append(child)
+        return "\n".join(section)
+    return ""
+
+
+def _has_array_partial_update(content: str) -> bool:
+    return re.search(r"ARRAY_(APPEND|REMOVE)|array_partial_update", content, re.IGNORECASE) is not None
+
+
+def _check_covered_gaps(path: str, content: str) -> list[str]:
+    errors: list[str] = []
+    for section_name in ["coverage_matrix", "dimension_coverage"]:
+        for block in _split_top_level_blocks(content, section_name):
+            if not re.search(r"status:\s*covered\b", block):
+                continue
+            gap_match = re.search(r"gaps?:\s*(?P<gap>.*)", block)
+            gap_text = gap_match.group("gap") if gap_match else ""
+            if not gap_text.strip() or gap_text.strip() in {"[]", "none", "null"}:
+                continue
+            lowered = gap_text.lower()
+            for pattern in BLOCKED_GAP_PATTERNS:
+                if re.search(pattern, lowered):
+                    errors.append(
+                        f"{path}: {section_name} uses status covered with unresolved gap matching {pattern!r}"
+                    )
+                    break
+    return errors
+
+
+def _check_decision_case_mixing(path: str, content: str) -> list[str]:
+    errors: list[str] = []
+    decision_scenarios: set[str] = set()
+    for scenario in _split_top_level_blocks(content, "scenario_matrix"):
+        if "decision_status: needs_decision" not in scenario:
+            continue
+        scenario_id = re.search(r"scenario_id:\s*(SCN-\d+)", scenario)
+        case_id = re.search(r"case_id:\s*(FQA-\d+)", scenario)
+        if scenario_id:
+            decision_scenarios.add(scenario_id.group(1))
+        if case_id and "blocked" not in scenario.lower() and "pending" not in scenario.lower():
+            errors.append(
+                f"{path}: needs_decision scenario maps to {case_id.group(1)} without blocked or pending wording"
+            )
+
+    if decision_scenarios and "open_decisions:" not in content:
+        errors.append(f"{path}: needs_decision scenarios must have open_decisions")
+
+    case_status: dict[str, set[str]] = {}
+    for scenario in _split_top_level_blocks(content, "scenario_matrix"):
+        case_id = re.search(r"case_id:\s*(FQA-\d+)", scenario)
+        decision_status = re.search(r"decision_status:\s*(confirmed|needs_decision|not_applicable)", scenario)
+        if case_id and decision_status:
+            case_status.setdefault(case_id.group(1), set()).add(decision_status.group(1))
+    for case_id, statuses in case_status.items():
+        if "needs_decision" in statuses and "confirmed" in statuses:
+            errors.append(
+                f"{path}: {case_id} mixes confirmed and needs_decision scenarios; split the pending decision"
+            )
+    return errors
+
+
+def _check_array_dimension_coverage(path: str, content: str) -> list[str]:
+    if not _has_array_partial_update(content):
+        return []
+
+    blocks = [
+        block
+        for block in _split_top_level_blocks(content, "dimension_coverage")
+        if re.search(r"dimension:\s*array_partial_update\b", block)
+    ]
+    if not blocks:
+        return [f"{path}: Array partial update plans must include dimension_coverage for array_partial_update"]
+
+    errors: list[str] = []
+    for block in blocks:
+        status_match = re.search(r"status:\s*(covered|partial|missing|not_applicable)", block)
+        status = status_match.group(1) if status_match else "unknown"
+        covered_block = _extract_mapping_section(block, "covered")
+        append_types = _extract_list(covered_block, "append_element_types")
+        remove_types = _extract_list(covered_block, "remove_element_types")
+        boundaries = _extract_list(covered_block, "boundaries")
+        system_modes = _extract_list(covered_block, "system_modes")
+
+        missing: list[str] = []
+        for label, covered, required in [
+            ("append element types", append_types, ARRAY_REQUIRED_APPEND_TYPES),
+            ("remove element types", remove_types, ARRAY_REQUIRED_REMOVE_TYPES),
+            ("boundaries", boundaries, ARRAY_REQUIRED_BOUNDARIES),
+            ("system modes", system_modes, ARRAY_REQUIRED_SYSTEM_MODES),
+        ]:
+            gap = sorted(required - covered)
+            if gap:
+                missing.append(f"{label}: {', '.join(gap)}")
+
+        if status == "covered" and missing:
+            errors.append(
+                f"{path}: array_partial_update dimension is covered but misses {'; '.join(missing)}"
+            )
+        elif status in {"partial", "missing"} and not re.search(r"gaps:\n\s+-\s+\S|gaps:\s*\[[^\]]+\]", block):
+            errors.append(f"{path}: array_partial_update {status} dimension must list gaps")
+    return errors
+
+
 def _check_case(path: str) -> list[str]:
     content = _read(path)
     errors = _check_required(path, content, CASE_REQUIRED_PATTERNS)
@@ -115,6 +328,9 @@ def _check_plan(path: str) -> list[str]:
     content = _read(path)
     errors = _check_required(path, content, PLAN_REQUIRED_PATTERNS)
     errors.extend(_check_placeholders(path, content))
+    errors.extend(_check_covered_gaps(path, content))
+    errors.extend(_check_decision_case_mixing(path, content))
+    errors.extend(_check_array_dimension_coverage(path, content))
     if "status: missing" in content and not re.search(r"gap:\s*\S", content):
         errors.append(f"{path}: missing coverage entries must explain gap")
     if "decision_status: needs_decision" in content:

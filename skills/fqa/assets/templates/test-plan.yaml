@@ -26,6 +26,22 @@ coverage_matrix:
       - FQA-001
     status: covered|partial|missing
     gap: ""
+dimension_coverage:
+  - dimension: ""
+    applies_when: ""
+    status: covered|partial|missing|not_applicable
+    required:
+      operations: []
+      element_types: []
+      boundaries: []
+      system_modes: []
+    covered:
+      append_element_types: []
+      remove_element_types: []
+      boundaries: []
+      system_modes: []
+    scenario_ids: []
+    gaps: []
 scenario_matrix:
   - scenario_id: SCN-001
     risk_id: RISK-001
@@ -65,6 +81,13 @@ approval:
   approved_at: null
 cluster:
   provided: false
+  test_mode: local|remote|null
+  local:
+    worktree_path: null
+    skip_large_data: true
+  remote:
+    endpoint_alias: null
+    token_alias: null
   endpoint_alias: null
   cleanup_allowed: false
   restart_allowed: false

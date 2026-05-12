@@ -139,9 +139,32 @@ changes after approval, clear its approval until the user approves the new hash.
 
 ### WaitingCluster
 
-Ask for:
+Ask for test mode first when it is not already known:
+
+- `local`: build and run Milvus from a local worktree.
+- `remote`: run tests against a user-provided remote Milvus environment.
+
+For `local` mode:
+
+- Locate the target feature worktree from the source repo, branch, or commit.
+- If no matching worktree exists, use `scripts/fqa_local_milvus.py` to plan a
+  new worktree under `~/Code/<feature_id>/<repo-name>/` or a user-provided
+  worktree root.
+- Ask for explicit approval before running `scripts/fqa_local_milvus.py
+  --execute`; dry-run output is safe before approval.
+- Build Milvus in that worktree with `source ~/.profile && source
+  scripts/setenv.sh && make milvus`.
+- Start local standalone Milvus with `source ~/.profile && source
+  scripts/setenv.sh && ./scripts/start_standalone.sh`.
+- Mark large-data, load, and stress-oriented cases skipped by default unless
+  the user explicitly includes large-data testing in local mode.
+- Record the worktree path, commit, build command, start command, endpoint
+  alias, and skipped case IDs in run evidence.
+
+For `remote` mode, ask for:
 
 - Endpoint and protocol.
+- Token or credential alias. Never ask to store raw tokens in FQA artifacts.
 - Authentication method.
 - Namespace, database, tenant, or project.
 - Collection or resource name prefix.

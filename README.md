@@ -82,10 +82,12 @@ stateDiagram-v2
 - Checks understanding quality before test-case generation.
 - Traces test-plan risks and cases back to understanding risk seeds.
 - Preserves concrete type, operation, validation, boundary, and system-mode variants in a scenario matrix.
+- Checks dimension coverage so concrete operations, types, boundaries, and modes cannot be marked covered while gaps remain.
 - Tracks unresolved product semantics as open decisions instead of inventing expectations.
 - Checks generated cases for coverage, strong oracles, diagnostics, and flakiness controls.
 - Converts feature risk into structured, reviewable test cases.
 - Enforces human gates before script generation, cluster execution, and issue creation.
+- Supports local and remote execution modes; local mode prepares a Milvus worktree and skips large-data cases by default.
 - Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
 - Stores workflows under one global FQA base directory, with per-feature `state.yaml`.
 - Archives or deletes one workflow with dry-run and active-session protection.
@@ -106,7 +108,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.9.0
+git checkout v0.11.0
 ./scripts/install-skill.sh
 ```
 
@@ -117,7 +119,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.9.0
+  --ref v0.11.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -197,12 +199,29 @@ Artifacts:
 Waiting for human approval before generating scripts.
 ```
 
-### Execute approved cases on a cluster
+### Execute approved cases
 
 **Input**
 
 ```text
-The cases are approved. Use endpoint alias staging-us-west.
+The cases are approved. Use local mode for this feature branch.
+Build and start local Milvus before execution.
+```
+
+**Output**
+
+```text
+State: WaitingCluster
+- Planned local Milvus worktree for the target branch
+- Local mode will skip large-data and load-oriented cases by default
+
+Next gate: approve local worktree creation, build, and service start.
+```
+
+**Input**
+
+```text
+Use remote mode with endpoint alias staging-us-west and token alias qa-token.
 Cleanup is allowed. Component restarts are not allowed.
 ```
 
@@ -308,6 +327,7 @@ skills/fqa/
 │   ├── fqa_check_cases.py
 │   ├── fqa_check_understanding.py
 │   ├── fqa_clean.py
+│   ├── fqa_local_milvus.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/
@@ -325,8 +345,8 @@ skills/fqa/
 
 The skill keeps the loaded context small. `SKILL.md` contains the state machine
 and guardrails; detailed schemas and writing rules live in `references/`;
-copyable artifact skeletons live in `assets/templates/`; deterministic status
-and workspace checks live in `scripts/`.
+copyable artifact skeletons live in `assets/templates/`; deterministic status,
+workspace checks, cleanup, and local Milvus preparation live in `scripts/`.
 
 By default, generated workflow artifacts are stored under one global base
 directory:

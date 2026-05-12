@@ -79,9 +79,10 @@ For Array partial update style features, preserve both levels:
 - Risk spine: append/remove correctness, validation, capacity, multi-field
   mapping, persistence/recovery, compatibility, concurrency.
 - Scenario matrix:
-  - Append type variants: Bool, Int8, Int16, Int32, Float, Double, VarChar.
-  - Remove type variants: at least Int64, Bool, Int32, Float, VarChar; include
-    other supported types when the requirement says all element types.
+  - Append type variants: Bool, Int8, Int16, Int32, Int64, Float, Double,
+    VarChar.
+  - Remove type variants: Bool, Int8, Int16, Int32, Int64, Float, Double,
+    VarChar when the requirement says all element types.
   - Validation: non-array field, primary key field, unknown field, element type
     mismatch, missing field data, automatic partial update behavior.
   - Boundaries: empty array, remove all, no-match remove, duplicate remove,
@@ -93,12 +94,44 @@ For Array partial update style features, preserve both levels:
 If a document says "all element types" but lists only a subset, mark the
 missing types as `partial` or `missing` in the coverage matrix.
 
+Also include a `dimension_coverage` row:
+
+```yaml
+dimension_coverage:
+  - dimension: array_partial_update
+    applies_when: ARRAY_APPEND or ARRAY_REMOVE changes Array field behavior
+    status: covered|partial|missing
+    required:
+      operations: [append, remove]
+      element_types: [Bool, Int8, Int16, Int32, Int64, Float, Double, VarChar]
+      boundaries: [empty_base, single_element, duplicate, no_match, remove_all, exact_capacity, overflow, varchar_max_length]
+      system_modes: [multi_field, mixed_insert_update, flush_reload_filter, compatibility, concurrency, sdk]
+    covered:
+      append_element_types: []
+      remove_element_types: []
+      boundaries: []
+      system_modes: []
+    scenario_ids: []
+    gaps: []
+```
+
+For Array partial update, a `covered` dimension row must include every required
+operation, append/remove element type, boundary, and system mode above. If an
+environment is unavailable, a product decision is pending, or a type is omitted,
+the row must be `partial` or `missing`. Nullable behavior should be isolated in
+an `open_decisions` scenario or a blocked case, not mixed into a confirmed
+multi-risk case.
+
 ## Quality Rules
 
 - Do not replace a concrete matrix with one abstract case.
 - Do not mark a matrix dimension covered unless a case or parameter row names
   it explicitly.
 - Do not treat unresolved semantics as confirmed expected behavior.
+- Do not mark a coverage or dimension row `covered` if its gap mentions missing
+  environment, pending decisions, skipped execution, or follow-up work.
+- Do not mix `decision_status: needs_decision` and confirmed assertions in the
+  same diagnostic case unless the pending scenario is explicitly blocked.
 - Prefer parameterized cases for repetitive type/boundary rows, but keep
   validation branches separate when failure diagnosis differs.
 - Every `P0` scenario must either have a case or an explicit open decision.

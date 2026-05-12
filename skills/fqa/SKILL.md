@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.9.0
+  version: 0.11.0
 ---
 
 # FQA
@@ -129,6 +129,9 @@ Bundled helper scripts:
   resume, report, issue creation, or closeout.
 - `scripts/fqa_clean.py`: dry-run, archive, or delete one workflow workspace.
   It refuses active sessions or `.lock` unless takeover is explicitly approved.
+- `scripts/fqa_local_milvus.py`: locate or create a local Milvus worktree,
+  build Milvus, and start a local standalone service after explicit execution
+  approval. It defaults to dry-run and skips large-data cases in local mode.
 
 ## Workflow
 
@@ -179,6 +182,10 @@ Bundled helper scripts:
      semantics.
    - Generate a coverage matrix that maps risk seeds to cases and marks
      uncovered or partially covered areas.
+   - Generate `dimension_coverage` when a feature has concrete operations,
+     types, boundaries, compatibility modes, or system modes. Do not mark an
+     area `covered` unless every required dimension is either covered by a
+     scenario/case or explicitly listed as not applicable.
    - Preserve unresolved product semantics as `open_decisions`; do not silently
      convert them into confirmed expected behavior.
    - Critique generated cases against `references/test-case-guidelines.md`.
@@ -193,10 +200,18 @@ Bundled helper scripts:
    - Ask the user to approve, reject, or edit cases.
 
 5. **Ask for cluster access**
-   - After case approval, request endpoint, auth method, namespace, resource
-     limits, cleanup permission, and fault-injection permission.
-   - Update `intake/feature-intake.yaml` with cluster details, using aliases for
-     credentials and never storing secrets.
+   - After case approval, ask the user to choose `local` or `remote` test mode
+     if it is not already provided.
+   - In `local` mode, find the target feature worktree or use
+     `scripts/fqa_local_milvus.py` to plan a new one. Ask before running with
+     `--execute`. Build Milvus in that worktree, start local standalone Milvus,
+     and skip large-data or load-oriented cases unless the user explicitly
+     includes them.
+   - In `remote` mode, request endpoint, token alias, auth method, namespace,
+     resource limits, cleanup permission, and fault-injection permission. Never
+     store raw tokens.
+   - Update `intake/feature-intake.yaml` with test mode and environment
+     details, using aliases for credentials and never storing secrets.
    - Set state to `WaitingCluster` until provided.
 
 6. **Generate scripts**
@@ -207,6 +222,10 @@ Bundled helper scripts:
 
 7. **Execute and collect evidence**
    - Execute only after cluster permission.
+   - Record whether execution used `local` or `remote` mode. For local mode,
+     record the worktree path, commit, build command, service start command,
+     endpoint alias, and skipped large-data cases. For remote mode, record the
+     endpoint alias, token alias, namespace, and remote cluster version.
    - Record code version, cluster version, config, raw output, logs, metrics,
      and cleanup status.
    - Write each execution to a new `execution/runs/<run_id>/` directory.

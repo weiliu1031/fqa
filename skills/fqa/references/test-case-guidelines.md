@@ -67,6 +67,20 @@ Generate cases across these areas when applicable:
 - Observability: logs, metrics, traces, and error messages.
 - Security, permissions, tenant isolation, and destructive operations.
 
+## Execution Mode Fit
+
+Classify each case for `local`, `remote`, or both when generating cases.
+Local mode is for fast correctness validation on a locally built Milvus
+standalone service. It should skip large-data, load, stress, long-running,
+multi-node, and remote-observability cases unless the user explicitly opts in.
+Remote mode is for environment-dependent validation that needs a real endpoint,
+token alias, namespace, larger resources, multi-node topology, or cloud
+observability.
+
+If a case is not suitable for local mode, keep it in the plan but mark local
+execution as skipped with a clear reason. Do not silently delete remote-only
+coverage from the plan.
+
 ## Case Quality Bar
 
 Each case must be executable by a different engineer without extra context.
@@ -87,6 +101,7 @@ Every case needs:
 - Diagnostic evidence to collect on failure.
 - Flakiness controls: timeout, polling interval, and retry policy.
 - Required cluster capability.
+- Local/remote execution-mode support and skip reasons when not supported.
 - Cleanup plan.
 - Priority.
 
@@ -137,6 +152,22 @@ assertion, failure mode, scale, compatibility path, or diagnostic signal. Use
 
 Do not drop a high-priority risk seed because it is hard to execute. Mark it
 as `missing` or `partial` and ask for a human decision at case review.
+
+## Dimension Coverage
+
+When the feature has concrete dimensions such as operations, element types,
+boundaries, compatibility modes, SDKs, or system modes, add
+`dimension_coverage` to `planning/test-plan.yaml`. Use it to state the required
+dimension set and the covered dimension set in machine-checkable lists.
+
+Use `covered` only when every required dimension is represented by a
+`scenario_matrix` row or is explicitly not applicable. If any required
+operation, type, boundary, or mode is missing, set the dimension status to
+`partial` or `missing` and list the gap. Do not hide environment dependencies
+or unresolved product decisions inside a `covered` row.
+
+Split a pending product decision into a separate scenario or blocked case when
+it would otherwise mix confirmed pass/fail assertions with unresolved behavior.
 
 ## Scenario Matrix
 

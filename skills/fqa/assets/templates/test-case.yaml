@@ -19,6 +19,13 @@ risk:
 preconditions:
   - ""
 cluster_requirement:
+  execution_modes:
+    local:
+      supported: true
+      skip_reason: null
+    remote:
+      supported: true
+      skip_reason: null
   topology: ""
   permissions:
     cleanup: false

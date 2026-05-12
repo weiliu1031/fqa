@@ -80,10 +80,12 @@ stateDiagram-v2
 - 在生成 test case 前检查 understanding 的证据、confidence 和 risk seed。
 - 将 test plan risk 和 case 追溯到 understanding risk seed。
 - 用 scenario matrix 保留具体类型、操作、校验分支、边界值和系统模式。
+- 检查 dimension coverage，避免在具体操作、类型、边界或模式仍有缺口时误标 covered。
 - 将未决产品语义记录为 open decisions，不凭空生成预期。
 - 检查生成的 case 是否具备覆盖矩阵、强 oracle、诊断证据和 flakiness 控制。
 - 将 feature 风险转换成结构化、可审核的 test case。
 - 在脚本生成、集群执行、issue 创建前强制人工 gate。
+- 支持 local 和 remote 执行模式；local mode 会准备 Milvus worktree，并默认跳过大数据量 case。
 - 提供 test plan、case、script、result、report、issue candidate 等模板。
 - 将 workflow 存到统一的 FQA base dir，并用每个 feature 的 `state.yaml` 管理状态。
 - 通过 dry-run 和 active-session 保护归档或删除单个 workflow。
@@ -104,7 +106,7 @@ cd fqa
 
 ```bash
 git fetch --tags
-git checkout v0.9.0
+git checkout v0.11.0
 ./scripts/install-skill.sh
 ```
 
@@ -115,7 +117,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.9.0
+  --ref v0.11.0
 ```
 
 安装或更新后需要重启 Codex。
@@ -194,12 +196,29 @@ Artifacts:
 Waiting for human approval before generating scripts.
 ```
 
-### 在集群上执行已批准的 case
+### 执行已批准的 case
 
 **输入**
 
 ```text
-The cases are approved. Use endpoint alias staging-us-west.
+The cases are approved. Use local mode for this feature branch.
+Build and start local Milvus before execution.
+```
+
+**输出**
+
+```text
+State: WaitingCluster
+- Planned local Milvus worktree for the target branch
+- Local mode will skip large-data and load-oriented cases by default
+
+Next gate: approve local worktree creation, build, and service start.
+```
+
+**输入**
+
+```text
+Use remote mode with endpoint alias staging-us-west and token alias qa-token.
 Cleanup is allowed. Component restarts are not allowed.
 ```
 
@@ -305,6 +324,7 @@ skills/fqa/
 │   ├── fqa_check_cases.py
 │   ├── fqa_check_understanding.py
 │   ├── fqa_clean.py
+│   ├── fqa_local_milvus.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/
@@ -322,7 +342,8 @@ skills/fqa/
 
 这个 skill 会控制加载到上下文里的内容量。`SKILL.md` 只保留状态机和防护规则；
 详细 schema 和写作规则放在 `references/`；可复制的产物骨架放在
-`assets/templates/`；确定性的 status 和 workspace 检查放在 `scripts/`。
+`assets/templates/`；确定性的 status、workspace 检查、cleanup 和 local Milvus
+准备放在 `scripts/`。
 
 默认情况下，生成的 workflow artifacts 会写到统一的全局 base dir：
 
