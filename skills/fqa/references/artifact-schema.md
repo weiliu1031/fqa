@@ -112,6 +112,11 @@ features:
     updated_at: string
 ```
 
+After cleanup, rebuild the registry from remaining active
+`features/*/state.yaml` files. Archived workspaces are stored under
+`<fqa_base_dir>/archive/` and are intentionally excluded from active status
+listing.
+
 ## Feature Intake
 
 `intake/feature-intake.yaml` records what the user provided, what the agent

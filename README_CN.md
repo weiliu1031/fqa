@@ -86,6 +86,7 @@ stateDiagram-v2
 - 在脚本生成、集群执行、issue 创建前强制人工 gate。
 - 提供 test plan、case、script、result、report、issue candidate 等模板。
 - 将 workflow 存到统一的 FQA base dir，并用每个 feature 的 `state.yaml` 管理状态。
+- 通过 dry-run 和 active-session 保护归档或删除单个 workflow。
 - 用稳定 ID 串联 feature、case、run、failure、issue 和 regression。
 - 面向集群级 QA，不把自己伪装成 unit-test 生成器。
 
@@ -103,7 +104,7 @@ cd fqa
 
 ```bash
 git fetch --tags
-git checkout v0.8.0
+git checkout v0.9.0
 ./scripts/install-skill.sh
 ```
 
@@ -114,7 +115,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.8.0
+  --ref v0.9.0
 ```
 
 安装或更新后需要重启 Codex。
@@ -263,6 +264,26 @@ State: WaitingCluster
 Next gate: provide cluster access and execution permission.
 ```
 
+### 清理 workflow
+
+**输入**
+
+```text
+Use $fqa clean fqa-example-20260508-pr123.
+```
+
+**输出**
+
+```text
+Feature ID: fqa-example-20260508-pr123
+Action: archive
+Mode: dry-run
+Result: dry-run only; add --force to execute
+```
+
+默认 cleanup 模式是 archive，因为它会保留 evidence。永久删除需要用户明确
+提出 delete，并在当前对话中批准执行。
+
 ## 工作原理
 
 FQA 是一个 Codex skill 加一组可复用模板：
@@ -283,6 +304,7 @@ skills/fqa/
 ├── scripts/
 │   ├── fqa_check_cases.py
 │   ├── fqa_check_understanding.py
+│   ├── fqa_clean.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/

@@ -88,6 +88,7 @@ stateDiagram-v2
 - Enforces human gates before script generation, cluster execution, and issue creation.
 - Produces reusable artifact templates for plans, cases, scripts, results, reports, and issue candidates.
 - Stores workflows under one global FQA base directory, with per-feature `state.yaml`.
+- Archives or deletes one workflow with dry-run and active-session protection.
 - Tracks stable IDs across features, cases, runs, failures, issues, and regressions.
 - Supports cluster-oriented QA without pretending to be a unit-test generator.
 
@@ -105,7 +106,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.8.0
+git checkout v0.9.0
 ./scripts/install-skill.sh
 ```
 
@@ -116,7 +117,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.8.0
+  --ref v0.9.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -266,6 +267,26 @@ State: WaitingCluster
 Next gate: provide cluster access and execution permission.
 ```
 
+### Clean a workflow
+
+**Input**
+
+```text
+Use $fqa clean fqa-example-20260508-pr123.
+```
+
+**Output**
+
+```text
+Feature ID: fqa-example-20260508-pr123
+Action: archive
+Mode: dry-run
+Result: dry-run only; add --force to execute
+```
+
+Archive is the default cleanup mode because it preserves evidence. Permanent
+deletion requires an explicit delete request and current approval.
+
 ## How It Works
 
 FQA is a Codex skill plus reusable templates:
@@ -286,6 +307,7 @@ skills/fqa/
 ├── scripts/
 │   ├── fqa_check_cases.py
 │   ├── fqa_check_understanding.py
+│   ├── fqa_clean.py
 │   ├── fqa_status.py
 │   └── fqa_validate_workspace.py
 └── assets/templates/

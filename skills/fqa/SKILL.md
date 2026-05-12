@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.8.0
+  version: 0.9.0
 ---
 
 # FQA
@@ -111,10 +111,14 @@ Support these user intents:
   latest report, and next required human decision.
 - `resume <feature_id>`: read that workflow's `state.yaml`, verify referenced
   artifacts exist, and continue from the next incomplete gate.
+- `clean`, `archive`, `delete`, or `remove <feature_id>`: preview cleanup for
+  one workflow first. Archive by default; permanently delete only when the user
+  explicitly asks for deletion.
 
 If a feature ID is missing or ambiguous, list candidate workflows and ask the
 user to choose. Read `references/workflow.md` for the required status fields and
-resume behavior.
+resume behavior. Cleanup is destructive or evidence-moving work, so require
+explicit approval in the current conversation before running with `--force`.
 
 Bundled helper scripts:
 
@@ -123,6 +127,8 @@ Bundled helper scripts:
   `$CODEX_HOME/fqa` or `~/.codex/fqa`.
 - `scripts/fqa_validate_workspace.py`: validate a feature workspace before
   resume, report, issue creation, or closeout.
+- `scripts/fqa_clean.py`: dry-run, archive, or delete one workflow workspace.
+  It refuses active sessions or `.lock` unless takeover is explicitly approved.
 
 ## Workflow
 

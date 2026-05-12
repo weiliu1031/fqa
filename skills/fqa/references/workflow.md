@@ -296,6 +296,34 @@ For `status <feature_id>`, show:
 - Latest run ID, latest report, and next gate.
 - Any notes.
 
+## Cleanup And Archive Behavior
+
+When the user asks to clean, archive, remove, or delete a workflow, operate on
+exactly one canonical feature workspace:
+
+```text
+<fqa_base_dir>/features/<feature_id>/
+```
+
+Use `scripts/fqa_clean.py <feature_id>` when available. It defaults to a dry
+run and archives by default. Run with `--force` only after explicit approval in
+the current conversation.
+
+Supported cleanup modes:
+
+- Dry-run archive preview:
+  `scripts/fqa_clean.py <feature_id>`
+- Archive while preserving evidence:
+  `scripts/fqa_clean.py <feature_id> --archive --force`
+- Permanent deletion:
+  `scripts/fqa_clean.py <feature_id> --delete --force`
+
+If `state.yaml.active_session.status` is `active` or `.lock` exists, stop before
+cleanup unless the user explicitly approves takeover. With approval, pass
+`--takeover`. After archive or delete, rebuild `<fqa_base_dir>/registry.yaml`
+from remaining `features/*/state.yaml` files. Archived workspaces live under
+`<fqa_base_dir>/archive/<feature_id>-<timestamp>/` and are not active workflows.
+
 ## Concurrent Sessions
 
 Different features may be tested at the same time because each feature has its

@@ -42,6 +42,7 @@ required=(
   "$SKILL_DIR/scripts/fqa_validate_workspace.py"
   "$SKILL_DIR/scripts/fqa_check_understanding.py"
   "$SKILL_DIR/scripts/fqa_check_cases.py"
+  "$SKILL_DIR/scripts/fqa_clean.py"
 )
 
 for path in "${required[@]}"; do
@@ -55,7 +56,8 @@ for script in \
   "$SKILL_DIR/scripts/fqa_status.py" \
   "$SKILL_DIR/scripts/fqa_validate_workspace.py" \
   "$SKILL_DIR/scripts/fqa_check_understanding.py" \
-  "$SKILL_DIR/scripts/fqa_check_cases.py"; do
+  "$SKILL_DIR/scripts/fqa_check_cases.py" \
+  "$SKILL_DIR/scripts/fqa_clean.py"; do
   if [[ ! -x "$script" ]]; then
     echo "Required script is not executable: $script" >&2
     exit 1
@@ -66,6 +68,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_status.py" --help >/de
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_validate_workspace.py" --help >/dev/null
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_understanding.py" --help >/dev/null
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" --help >/dev/null
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_clean.py" --help >/dev/null
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -326,6 +329,52 @@ cleanup:
 status: proposed
 EOF_CASE
 PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_check_cases.py" "$workspace" >/dev/null
+
+cat > "$base_dir/registry.yaml" <<EOF_REGISTRY
+version: 1
+updated_at: "validation"
+features:
+  - feature_id: "fqa-feature-YYYYMMDD-source"
+    feature_name: "validation fixture"
+    state: "CaseReview"
+    workspace: "$workspace"
+    source_repo: "validation"
+    source_repo_path: null
+    source_worktree_path: null
+    branch: "main"
+    commit: "validation"
+    updated_at: null
+EOF_REGISTRY
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_clean.py" \
+  fqa-feature-YYYYMMDD-source --base "$base_dir" >/dev/null
+if [[ ! -d "$workspace" ]]; then
+  echo "fqa_clean dry-run mutated workspace" >&2
+  exit 1
+fi
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_clean.py" \
+  fqa-feature-YYYYMMDD-source --base "$base_dir" --force --takeover >/dev/null
+if [[ -d "$workspace" ]]; then
+  echo "fqa_clean archive did not move workspace" >&2
+  exit 1
+fi
+if ! find "$base_dir/archive" -name archive-manifest.yaml -print -quit | grep -q archive-manifest.yaml; then
+  echo "fqa_clean archive did not write archive manifest" >&2
+  exit 1
+fi
+if grep -q "fqa-feature-YYYYMMDD-source" "$base_dir/registry.yaml"; then
+  echo "fqa_clean archive did not rebuild registry" >&2
+  exit 1
+fi
+
+delete_workspace="$base_dir/features/fqa-delete-YYYYMMDD-source"
+mkdir -p "$delete_workspace"
+cp "$SKILL_DIR/assets/templates/state.yaml" "$delete_workspace/state.yaml"
+PYTHONDONTWRITEBYTECODE=1 python3 "$SKILL_DIR/scripts/fqa_clean.py" \
+  fqa-delete-YYYYMMDD-source --base "$base_dir" --delete --force --takeover >/dev/null
+if [[ -d "$delete_workspace" ]]; then
+  echo "fqa_clean delete did not remove workspace" >&2
+  exit 1
+fi
 
 legacy_workspace="$tmp_dir/repo/.fqa/features/fqa-feature-legacy-YYYYMMDD-source"
 mkdir -p "$legacy_workspace"/{cases,scripts,runs,reports,issues}
