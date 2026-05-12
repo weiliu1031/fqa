@@ -44,8 +44,12 @@ CASE_REQUIRED_PATTERNS = {
 
 PLAN_REQUIRED_PATTERNS = {
     "coverage matrix": r"^coverage_matrix:",
+    "scenario matrix": r"^scenario_matrix:",
     "coverage status": r"status:\s*(covered|partial|missing)",
     "risk seed id": r"RS-(DESIGN|IMPL)-\d+",
+    "scenario id": r"SCN-\d+",
+    "scenario category": r"category:\s*(type_variant|operation_variant|validation|boundary|system_mode|compatibility|concurrency|other)",
+    "decision status": r"decision_status:\s*(confirmed|needs_decision|not_applicable)",
 }
 
 
@@ -113,6 +117,11 @@ def _check_plan(path: str) -> list[str]:
     errors.extend(_check_placeholders(path, content))
     if "status: missing" in content and not re.search(r"gap:\s*\S", content):
         errors.append(f"{path}: missing coverage entries must explain gap")
+    if "decision_status: needs_decision" in content:
+        if "open_decisions:" not in content or not re.search(r"decision_id:\s*DEC-\d+", content):
+            errors.append(f"{path}: scenarios needing decisions must have open_decisions entries")
+    if re.search(r"scenario_id:\s*SCN-\d+", content) and not re.search(r"case_id:\s*FQA-\d+", content):
+        errors.append(f"{path}: scenario rows must map to FQA case IDs unless explicitly blocked")
     return errors
 
 

@@ -44,6 +44,7 @@ State: Drafting
 - Generated planning/understanding/implementation-understanding.md from changed components
 - Checked understanding quality for evidence, confidence, and risk seeds
 - Built a risk model covering API behavior, recovery, compatibility, and observability
+- Expanded concrete variants into a scenario matrix with open decisions
 - Checked generated cases for traceability, strong oracles, diagnostics, and flakiness controls
 - Generated FQA-001 through FQA-008 test cases
 
@@ -78,6 +79,8 @@ stateDiagram-v2
 - 没有设计文档时，生成带 evidence 的 design 和 implementation understanding。
 - 在生成 test case 前检查 understanding 的证据、confidence 和 risk seed。
 - 将 test plan risk 和 case 追溯到 understanding risk seed。
+- 用 scenario matrix 保留具体类型、操作、校验分支、边界值和系统模式。
+- 将未决产品语义记录为 open decisions，不凭空生成预期。
 - 检查生成的 case 是否具备覆盖矩阵、强 oracle、诊断证据和 flakiness 控制。
 - 将 feature 风险转换成结构化、可审核的 test case。
 - 在脚本生成、集群执行、issue 创建前强制人工 gate。
@@ -100,7 +103,7 @@ cd fqa
 
 ```bash
 git fetch --tags
-git checkout v0.7.0
+git checkout v0.8.0
 ./scripts/install-skill.sh
 ```
 
@@ -111,7 +114,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.7.0
+  --ref v0.8.0
 ```
 
 安装或更新后需要重启 Codex。
@@ -272,6 +275,7 @@ skills/fqa/
 │   ├── artifact-schema.md
 │   ├── intake-guidelines.md
 │   ├── understanding-guidelines.md
+│   ├── test-design-patterns.md
 │   ├── issue-guidelines.md
 │   ├── report-guidelines.md
 │   ├── test-case-guidelines.md

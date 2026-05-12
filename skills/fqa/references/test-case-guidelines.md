@@ -10,6 +10,10 @@ risk and produce enough evidence for another engineer to diagnose the result.
 Use this file before writing `planning/test-plan.yaml` and
 `planning/cases/FQA-*.yaml`.
 
+Read `references/test-design-patterns.md` first. Use its scenario matrix rules
+to preserve concrete type variants, operation variants, validation branches,
+boundary values, system modes, and unresolved product decisions.
+
 ## Source-to-Risk Derivation
 
 Derive cases from verified source signals. Prefer concrete design text, code
@@ -133,6 +137,19 @@ assertion, failure mode, scale, compatibility path, or diagnostic signal. Use
 
 Do not drop a high-priority risk seed because it is hard to execute. Mark it
 as `missing` or `partial` and ask for a human decision at case review.
+
+## Scenario Matrix
+
+`planning/test-plan.yaml` must include a `scenario_matrix` when one risk spans
+multiple concrete variants. Each scenario row should name the parameter or
+boundary being covered, the expected result, and the case that will execute it.
+
+Use parameterized cases for repetitive rows only if each parameter row remains
+visible in the matrix and failure output can identify the exact scenario.
+
+If expected behavior is not confirmed, set `decision_status: needs_decision`
+and add an `open_decisions` entry. Do not convert uncertain behavior into a
+passing assertion.
 
 ## Weak Case Blacklist
 

@@ -24,6 +24,7 @@ required=(
   "$SKILL_DIR/references/artifact-schema.md"
   "$SKILL_DIR/references/intake-guidelines.md"
   "$SKILL_DIR/references/understanding-guidelines.md"
+  "$SKILL_DIR/references/test-design-patterns.md"
   "$SKILL_DIR/references/test-case-guidelines.md"
   "$SKILL_DIR/references/report-guidelines.md"
   "$SKILL_DIR/references/issue-guidelines.md"
@@ -216,6 +217,34 @@ coverage_matrix:
       - FQA-001
     status: covered
     gap: none
+scenario_matrix:
+  - scenario_id: SCN-001
+    risk_id: RISK-001
+    risk_seed_ids:
+      - RS-DESIGN-001
+      - RS-IMPL-001
+    case_id: FQA-001
+    priority: P1
+    category: validation
+    parameters:
+      element_type: null
+      operation: validate
+      boundary: null
+    setup: validation workspace contains a complete case file
+    action: run the FQA case checker
+    expected: checker exits zero for complete case artifacts
+    decision_status: confirmed
+    notes: validation fixture
+open_decisions:
+  - decision_id: DEC-001
+    scenario_ids:
+      - SCN-001
+    question: none
+    options:
+      - already confirmed
+    impact: none
+    owner: null
+    status: not_applicable
 cases:
   - case_id: FQA-001
     title: rejects incomplete validation fixture with actionable diagnostics

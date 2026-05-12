@@ -46,6 +46,7 @@ State: Drafting
 - Generated planning/understanding/implementation-understanding.md from changed components
 - Checked understanding quality for evidence, confidence, and risk seeds
 - Built a risk model covering API behavior, recovery, compatibility, and observability
+- Expanded concrete variants into a scenario matrix with open decisions
 - Checked generated cases for traceability, strong oracles, diagnostics, and flakiness controls
 - Generated FQA-001 through FQA-008 test cases
 
@@ -80,6 +81,8 @@ stateDiagram-v2
 - Generates evidence-backed design and implementation understanding when docs are missing.
 - Checks understanding quality before test-case generation.
 - Traces test-plan risks and cases back to understanding risk seeds.
+- Preserves concrete type, operation, validation, boundary, and system-mode variants in a scenario matrix.
+- Tracks unresolved product semantics as open decisions instead of inventing expectations.
 - Checks generated cases for coverage, strong oracles, diagnostics, and flakiness controls.
 - Converts feature risk into structured, reviewable test cases.
 - Enforces human gates before script generation, cluster execution, and issue creation.
@@ -102,7 +105,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.7.0
+git checkout v0.8.0
 ./scripts/install-skill.sh
 ```
 
@@ -113,7 +116,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.7.0
+  --ref v0.8.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -275,6 +278,7 @@ skills/fqa/
 │   ├── artifact-schema.md
 │   ├── intake-guidelines.md
 │   ├── understanding-guidelines.md
+│   ├── test-design-patterns.md
 │   ├── issue-guidelines.md
 │   ├── report-guidelines.md
 │   ├── test-case-guidelines.md

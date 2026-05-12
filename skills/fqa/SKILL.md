@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.7.0
+  version: 0.8.0
 ---
 
 # FQA
@@ -167,8 +167,14 @@ Bundled helper scripts:
    - Use one `assets/templates/test-case.yaml` shape per case.
    - Each risk and case must trace back to a risk seed from the understanding
      artifacts.
+   - Read `references/test-design-patterns.md`. Expand each risk into a
+     scenario matrix when the feature has type variants, operation variants,
+     validation branches, boundary values, compatibility modes, or unresolved
+     semantics.
    - Generate a coverage matrix that maps risk seeds to cases and marks
      uncovered or partially covered areas.
+   - Preserve unresolved product semantics as `open_decisions`; do not silently
+     convert them into confirmed expected behavior.
    - Critique generated cases against `references/test-case-guidelines.md`.
      Rewrite weak cases before presenting them for review.
    - Run `scripts/fqa_check_cases.py <feature_workspace>` when available. Do
@@ -237,6 +243,8 @@ Use stable IDs:
   intake questions.
 - Read `references/understanding-guidelines.md` before generating
   `planning/understanding/*`.
+- Read `references/test-design-patterns.md` before generating
+  `planning/test-plan.yaml`.
 - Read `references/test-case-guidelines.md` before generating test cases.
 - Read `references/report-guidelines.md` before writing reports.
 - Read `references/issue-guidelines.md` before creating issue candidates.

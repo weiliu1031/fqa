@@ -215,6 +215,33 @@ coverage_matrix:
       - string
     status: covered|partial|missing
     gap: string|null
+scenario_matrix:
+  - scenario_id: string
+    risk_id: string
+    risk_seed_ids:
+      - string
+    case_id: string|null
+    priority: P0|P1|P2|P3
+    category: type_variant|operation_variant|validation|boundary|system_mode|compatibility|concurrency|other
+    parameters:
+      element_type: string|null
+      operation: string|null
+      boundary: string|null
+    setup: string
+    action: string
+    expected: string
+    decision_status: confirmed|needs_decision|not_applicable
+    notes: string|null
+open_decisions:
+  - decision_id: string
+    scenario_ids:
+      - string
+    question: string
+    options:
+      - string
+    impact: string
+    owner: string|null
+    status: needs_decision|resolved|not_applicable
 cases:
   - case_id: string
     title: string

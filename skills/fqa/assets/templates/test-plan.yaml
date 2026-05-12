@@ -26,6 +26,32 @@ coverage_matrix:
       - FQA-001
     status: covered|partial|missing
     gap: ""
+scenario_matrix:
+  - scenario_id: SCN-001
+    risk_id: RISK-001
+    risk_seed_ids:
+      - RS-DESIGN-001
+    case_id: FQA-001
+    priority: P1
+    category: type_variant|operation_variant|validation|boundary|system_mode|compatibility|concurrency
+    parameters:
+      element_type: null
+      operation: null
+      boundary: null
+    setup: ""
+    action: ""
+    expected: ""
+    decision_status: confirmed|needs_decision|not_applicable
+    notes: ""
+open_decisions:
+  - decision_id: DEC-001
+    scenario_ids:
+      - SCN-001
+    question: ""
+    options: []
+    impact: ""
+    owner: null
+    status: needs_decision|resolved|not_applicable
 cases:
   - case_id: FQA-001
     title: ""
