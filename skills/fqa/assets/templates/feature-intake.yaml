@@ -97,6 +97,11 @@ cluster:
     source: missing
     confidence: unknown
     notes: "local or remote; collect after test case approval unless user provided it."
+  execution_profile:
+    value: null
+    source: missing
+    confidence: unknown
+    notes: "local_quick, remote_basic, or remote_full."
   local:
     worktree_path:
       value: null

@@ -108,7 +108,7 @@ Update an existing install from a release tag:
 
 ```bash
 git fetch --tags
-git checkout v0.11.0
+git checkout v0.13.0
 ./scripts/install-skill.sh
 ```
 
@@ -119,7 +119,7 @@ rm -rf ~/.codex/skills/fqa
 python ~/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py \
   --repo weiliu1031/fqa \
   --path skills/fqa \
-  --ref v0.11.0
+  --ref v0.13.0
 ```
 
 Restart Codex after installing or updating the skill.
@@ -212,10 +212,11 @@ Build and start local Milvus before execution.
 
 ```text
 State: WaitingCluster
-- Planned local Milvus worktree for the target branch
-- Local mode will skip large-data and load-oriented cases by default
+- local quick selected
+- Planned local Milvus worktree for the target branch.
+- Large-data and load-oriented cases will be skipped by default.
 
-Next gate: approve local worktree creation, build, and service start.
+Next question: approve this local dry-run plan?
 ```
 
 **Input**

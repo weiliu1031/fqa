@@ -2,7 +2,7 @@
 name: fqa
 description: Use when planning, generating, executing, reporting, or regressing feature-level QA for a product change, PR, design document, branch, issue, or implementation. Use for system tests, cluster tests, end-to-end validation, compatibility checks, failure recovery, observability verification, issue candidate review, and regression workflows; not for unit-test generation.
 metadata:
-  version: 0.11.0
+  version: 0.13.0
 ---
 
 # FQA
@@ -200,16 +200,22 @@ Bundled helper scripts:
    - Ask the user to approve, reject, or edit cases.
 
 5. **Ask for cluster access**
-   - After case approval, ask the user to choose `local` or `remote` test mode
-     if it is not already provided.
+   - After case approval, use one-question-at-a-time execution intake. Ask
+     exactly one current blocking question, wait for the answer, update
+     `feature-intake.yaml`, then ask the next question only if needed.
+   - First ask for the execution profile. Offer `local quick` as the
+     recommended default, plus `remote basic` and `remote full`.
    - In `local` mode, find the target feature worktree or use
      `scripts/fqa_local_milvus.py` to plan a new one. Ask before running with
      `--execute`. Build Milvus in that worktree, start local standalone Milvus,
      and skip large-data or load-oriented cases unless the user explicitly
      includes them.
-   - In `remote` mode, request endpoint, token alias, auth method, namespace,
-     resource limits, cleanup permission, and fault-injection permission. Never
-     store raw tokens.
+   - In `remote basic` mode, ask only for endpoint alias, credential/token
+     alias, and namespace/project when needed. Use safe defaults: generated
+     resource prefix, cleanup for FQA-created resources only, no restart, no
+     fault injection, no large-data tests.
+   - In `remote full` mode, collect advanced execution details one prompt at a
+     time, in dependency order. Never store raw tokens.
    - Update `intake/feature-intake.yaml` with test mode and environment
      details, using aliases for credentials and never storing secrets.
    - Set state to `WaitingCluster` until provided.

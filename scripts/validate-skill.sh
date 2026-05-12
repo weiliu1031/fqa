@@ -53,6 +53,14 @@ for path in "${required[@]}"; do
   fi
 done
 
+if rg -n \
+  "target release/build|endpoint alias 或|auth method 或|是否批准开始生成脚本|Only after test cases are approved, move to .* and ask for:|at most three|small groups|Group 1|Group 2|Group 3" \
+  "$SKILL_DIR" README.md README_CN.md >/tmp/fqa-intake-regression.txt; then
+  cat /tmp/fqa-intake-regression.txt >&2
+  echo "Found scary one-shot execution intake wording" >&2
+  exit 1
+fi
+
 for script in \
   "$SKILL_DIR/scripts/fqa_status.py" \
   "$SKILL_DIR/scripts/fqa_validate_workspace.py" \

@@ -15,7 +15,7 @@ state.
 - Do not ask for cluster credentials, secrets, endpoint details, or execution
   permission before test cases are approved.
 - After case approval, collect cluster access and execution constraints in
-  `WaitingCluster`.
+  `WaitingCluster` through a short execution profile prompt.
 - Treat every inferred value as unconfirmed until it is shown to the user or
   recorded with `confidence: inferred`.
 
@@ -117,6 +117,38 @@ Ask at most one follow-up question when the missing information blocks safe case
 generation. Prefer continuing with explicit assumptions over asking a long
 questionnaire.
 
+## Execution Intake Pattern
+
+After test cases are approved, do not ask for every possible environment
+setting at once. Ask one question, wait for the answer, update intake, then ask
+the next question only if it is still blocking. First ask for one execution
+profile:
+
+```text
+State: WaitingCluster
+
+How should I run the approved cases?
+
+1. local quick (recommended): build/start local Milvus, skip large-data cases.
+2. remote basic: use a remote endpoint; provide endpoint alias + credential alias.
+3. remote full: remote endpoint with cleanup/restart/fault-injection/log controls.
+```
+
+For `local quick`, continue with a dry-run plan from
+`scripts/fqa_local_milvus.py` and ask for one explicit approval before creating
+the worktree, building, or starting Milvus.
+
+For `remote basic`, ask only for endpoint alias and credential/token alias. Ask
+for them one at a time. Ask for namespace/project only if it is required. Use
+safe defaults for the rest:
+generated resource prefix, cleanup only for FQA-created resources, no component
+restart, no fault injection, no large-data tests, and client-side evidence
+first.
+
+For `remote full`, ask advanced details one item at a time, in dependency
+order. Keep raw secrets out of chat and artifacts; ask for aliases or
+out-of-band credential setup instead.
+
 ## Inference Rules
 
 Prefer verified source signals in this order:
@@ -156,17 +188,21 @@ Continue with explicit assumptions when:
 
 ## Cluster Intake After Case Approval
 
-Only after test cases are approved, move to `WaitingCluster` and ask for:
+Only after test cases are approved, move to `WaitingCluster` and ask for an
+execution profile first. Do not show a full cluster checklist unless the user
+chooses `remote full`.
 
-- Endpoint alias or endpoint and protocol.
-- Authentication method or credential alias.
-- Namespace, database, tenant, project, or resource group.
-- Resource name prefix.
-- Cleanup permission.
-- Resource budget.
-- Whether component restart, fault injection, or chaos operations are allowed.
-- Log, metric, trace, and dashboard access.
-- Execution approval for the target cluster.
+For `local quick`, ask only for approval of the dry-run worktree/build/start
+plan.
+
+For `remote basic`, ask only for endpoint alias and credential alias. Ask for
+endpoint alias first, then credential alias after the endpoint is known. Ask
+for namespace/project only when it is required by that environment.
+
+For `remote full`, ask advanced details one by one in this order: target build,
+endpoint alias, credential alias, namespace/project, resource prefix, resource
+budget, cleanup permission, restart permission, fault-injection permission, and
+observability access. Skip any item that is already known or not needed.
 
 Separate credentials from reports and artifacts. If the user sends a secret,
 do not repeat it back.

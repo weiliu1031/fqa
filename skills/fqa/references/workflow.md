@@ -139,10 +139,39 @@ changes after approval, clear its approval until the user approves the new hash.
 
 ### WaitingCluster
 
-Ask for test mode first when it is not already known:
+Use one-question-at-a-time execution intake. Do not present a full environment
+questionnaire by default. Ask exactly one current blocking question, wait for
+the answer, update `intake/feature-intake.yaml`, then ask the next question
+only if it is still needed.
 
-- `local`: build and run Milvus from a local worktree.
-- `remote`: run tests against a user-provided remote Milvus environment.
+Default first prompt after case approval:
+
+```text
+State: WaitingCluster
+
+How should I run the approved cases?
+
+1. local quick (recommended): build/start local Milvus from the feature
+   worktree; skip large-data cases.
+2. remote basic: run against a remote endpoint; I only need endpoint alias and
+   credential alias.
+3. remote full: remote endpoint plus cleanup/restart/fault-injection/log
+   controls.
+
+Reply with one option. After that I will ask one thing at a time.
+```
+
+Profiles:
+
+- `local quick`: build and run Milvus from a local worktree. Large-data, load,
+  stress, restart, and fault-injection cases are skipped unless explicitly
+  enabled.
+- `remote basic`: run tests against a user-provided remote Milvus environment
+  with safe defaults. Required inputs are endpoint alias and credential/token
+  alias; namespace/project is requested only if the environment needs one.
+- `remote full`: remote execution with explicit resource budget, cleanup
+  permission, restart permission, fault-injection permission, and observability
+  access.
 
 For `local` mode:
 
@@ -161,17 +190,35 @@ For `local` mode:
 - Record the worktree path, commit, build command, start command, endpoint
   alias, and skipped case IDs in run evidence.
 
-For `remote` mode, ask for:
+For `remote basic`, ask only for:
 
-- Endpoint and protocol.
+- Endpoint alias or endpoint/protocol.
 - Token or credential alias. Never ask to store raw tokens in FQA artifacts.
-- Authentication method.
-- Namespace, database, tenant, or project.
-- Collection or resource name prefix.
-- Cleanup permission.
-- Resource budget.
-- Whether component restart, fault injection, or chaos operations are allowed.
-- Log, metric, trace, and dashboard access.
+- Namespace, database, tenant, or project only when needed.
+
+Use these safe defaults unless the user overrides them:
+
+- Resource prefix: generated from the feature ID.
+- Cleanup: allowed only for resources created by FQA.
+- Restart component: not allowed.
+- Fault injection: not allowed.
+- Large-data/load tests: skipped.
+- Observability: collect client output and query results; ask for logs or
+  metrics only if a failure needs them.
+
+For `remote full`, ask the advanced items one at a time in this order, skipping
+items that are already known or not needed:
+
+1. Target release/build.
+2. Endpoint alias.
+3. Credential alias.
+4. Namespace/project.
+5. Resource prefix.
+6. Resource budget.
+7. Cleanup permission.
+8. Restart permission.
+9. Fault-injection permission.
+10. Observability access.
 
 Treat secrets as sensitive. Do not print credentials in reports.
 Update `intake/feature-intake.yaml` with cluster details after case approval.

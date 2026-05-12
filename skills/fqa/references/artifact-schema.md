@@ -166,6 +166,7 @@ constraints:
 cluster:
   requested_before_case_approval: boolean
   test_mode: intake_item              # local|remote|null
+  execution_profile: intake_item      # local_quick|remote_basic|remote_full|null
   local:
     worktree_path: intake_item
     seed_repo: intake_item
